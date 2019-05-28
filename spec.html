@@ -4608,7 +4608,7 @@
               String
             </td>
             <td>
-              See grammar and conversion algorithm below.
+              Return StringToNumber(_argument_).
             </td>
           </tr>
           <tr>
@@ -4645,10 +4645,7 @@
 
       <emu-clause id="sec-tonumber-applied-to-the-string-type">
         <h1>ToNumber Applied to the String Type</h1>
-        <p>ToNumber applied to Strings applies the following grammar to the input String interpreted as a sequence of UTF-16 encoded code points (<emu-xref href="#sec-ecmascript-language-types-string-type"></emu-xref>). If the grammar cannot interpret the String as an expansion of |StringNumericLiteral|, then the result of ToNumber is *NaN*.</p>
-        <emu-note>
-          <p>The terminal symbols of this grammar are all composed of characters in the Unicode Basic Multilingual Plane (BMP). Therefore, the result of ToNumber will be *NaN* if the string contains any <emu-xref href="#leading-surrogate"></emu-xref> or <emu-xref href="#trailing-surrogate"></emu-xref> code units, whether paired or unpaired.</p>
-        </emu-note>
+        <p>The abstract operation StringToNumber specifies how to convert a String value to a Number value. Overall, the process is similar to the determination of the NumericValue of a numeric literal (see <emu-xref href="#sec-literals-numeric-literals"></emu-xref>), but some of the details are different.</p>
         <h2>Syntax</h2>
         <emu-grammar type="definition">
           StringNumericLiteral :::
@@ -4704,7 +4701,6 @@
 
         <emu-clause id="sec-runtime-semantics-mv-s">
           <h1>Runtime Semantics: MV</h1>
-          <p>The conversion of a String to a Number value is similar overall to the determination of the Number value for a numeric literal (see <emu-xref href="#sec-literals-numeric-literals"></emu-xref>), but some of the details are different, so the process for converting a String numeric literal to a value of Number type is given here. This value is determined in two steps: first, a mathematical value (MV) is derived from the String numeric literal; second, this mathematical value is rounded as described below. The MV on any grammar symbol, not provided below, is the MV for that symbol defined in <emu-xref href="#sec-static-semantics-mv"></emu-xref>.</p>
           <ul>
             <li>
               The MV of <emu-grammar>StringNumericLiteral ::: [empty]</emu-grammar> is 0<sub>ℝ</sub>.
@@ -4758,7 +4754,30 @@
               The MV of <emu-grammar>StrUnsignedDecimalLiteral ::: DecimalDigits ExponentPart</emu-grammar> is the MV of |DecimalDigits| times 10<sub>ℝ</sub><sup>_e_</sup>, where _e_ is the MV of |ExponentPart|.
             </li>
           </ul>
-          <p>Once the exact MV for a String numeric literal has been determined, it is then rounded to a value of the Number type. If the MV is 0, then the rounded value is *+0* unless the first non white space code point in the String numeric literal is `-`, in which case the rounded value is *-0*. Otherwise, the rounded value must be the Number value for the MV (in the sense defined in <emu-xref href="#sec-ecmascript-language-types-number-type"></emu-xref>), unless the literal includes a |StrUnsignedDecimalLiteral| and the literal has more than 20 significant digits, in which case the Number value may be either the Number value for the MV of a literal produced by replacing each significant digit after the 20th with a 0 digit or the Number value for the MV of a literal produced by replacing each significant digit after the 20th with a 0 digit and then incrementing the literal at the 20th digit position. A digit is significant if it is not part of an |ExponentPart| and</p>
+          <p>For the MV of any production not shown above, see <emu-xref href="#sec-static-semantics-mv"></emu-xref>.</p>
+        </emu-clause>
+
+        <emu-clause id="sec-stringtonumber" aoid="StringToNumber">
+          <h1>StringToNumber ( _str_ )</h1>
+          <emu-alg>
+            1. Assert: Type(_str_) is String.
+            1. Let _text_ be the sequence of Unicode code points that results from interpreting _str_ as UTF-16 encoded Unicode text as described in <emu-xref href="#sec-ecmascript-language-types-string-type"></emu-xref>.
+            1. Let _literal_ be the result of parsing _text_ using the goal symbol |StringNumericLiteral|. If _text_ does not conform to the grammar, or if any elements of _text_ were not matched by the parse, return *NaN*.
+            1. NOTE: The terminal symbols of the |StringNumericLiteral| grammar are all code points in the Unicode Basic Multilingual Plane (BMP). Therefore, this operation will return *NaN* if _str_ contains any <emu-xref href="#leading-surrogate"></emu-xref> or <emu-xref href="#trailing-surrogate"></emu-xref> code units, whether paired or unpaired.
+            1. If _literal_ contains a |StrUnsignedDecimalLiteral| and _literal_ has more than 20 significant digits, then
+              1. Let _lit_ be an implementation-dependent choice of:
+                * _literal_
+                * a literal produced from _literal_ by replacing each significant digit after the 20th with a `0` digit
+                * a literal produced from _literal_ by replacing each significant digit after the 20th with a `0` digit and then incrementing the literal at the 20th significant digit position
+            1. Else,
+              1. Let _lit_ be _literal_.
+            1. Let _mv_ be the MV of _lit_.
+            1. If _mv_ is 0<sub>ℝ</sub>, then
+              1. If the first non white space code point in _text_ is `-`, return *-0*; else return *+0*.
+            1. Return the Number value for _mv_ (as specified in <emu-xref href="#sec-ecmascript-language-types-number-type"></emu-xref>).
+          </emu-alg>
+
+          <p>A digit is significant if it is not part of an |ExponentPart| and</p>
           <ul>
             <li>
               it is not `0`; or
@@ -11145,7 +11164,7 @@
 
       <emu-clause id="sec-static-semantics-mv">
         <h1>Static Semantics: MV</h1>
-        <p>A numeric literal stands for a value of the Number type or the BigInt type.</p>
+        <p>A numeric literal stands for a value of the Number type or the BigInt type, as specified by the syntax-directed operation NumericValue. Determining this value involves deriving a mathematical value (MV) from the literal, according to the following rules.</p>
         <ul>
           <li>
             The MV of <emu-grammar>NumericLiteral :: DecimalLiteral</emu-grammar> is the MV of |DecimalLiteral|.
@@ -11299,15 +11318,28 @@
 
       <emu-clause id="sec-numericvalue">
         <h1>Static Semantics: NumericValue</h1>
-        <emu-grammar>NumericLiteral :: DecimalLiteral</emu-grammar>
-        <emu-alg>
-          1. Return the Number value that results from rounding the MV of |DecimalLiteral| as described below.
-        </emu-alg>
         <emu-grammar>NumericLiteral :: NonDecimalIntegerLiteral</emu-grammar>
         <emu-alg>
-          1. Return the Number value that results from rounding the MV of |NonDecimalIntegerLiteral| as described below.
+          1. Let _mv_ be the MV of |NonDecimalIntegerLiteral|.
+          1. If _mv_ is 0<sub>ℝ</sub>, return *+0*.
+          1. Return the Number value for _mv_ (as specified in <emu-xref href="#sec-ecmascript-language-types-number-type"></emu-xref>).
         </emu-alg>
-        <p>Once the exact MV for a numeric literal has been determined, it is then rounded to a value of the Number type. If the MV is 0<sub>ℝ</sub>, then the rounded value is *+0*; otherwise, the rounded value must be the Number value for the MV (as specified in <emu-xref href="#sec-ecmascript-language-types-number-type"></emu-xref>), unless the literal is a |DecimalLiteral| and the literal has more than 20 significant digits, in which case the Number value may be either the Number value for the MV of a literal produced by replacing each significant digit after the 20th with a `0` digit or the Number value for the MV of a literal produced by replacing each significant digit after the 20th with a `0` digit and then incrementing the literal at the 20th significant digit position. A digit is <em>significant</em> if it is not part of an |ExponentPart| and</p>
+
+        <emu-grammar>NumericLiteral :: DecimalLiteral</emu-grammar>
+        <emu-alg>
+          1. If |DecimalLiteral| has more than 20 significant digits, then
+            1. Let _lit_ be an implementation-dependent choice of:
+              * |DecimalLiteral|
+              * a literal produced from |DecimalLiteral| by replacing each significant digit after the 20th with a `0` digit
+              * a literal produced from |DecimalLiteral| by replacing each significant digit after the 20th with a `0` digit and then incrementing the literal at the 20th significant digit position
+          1. Else,
+            1. Let _lit_ be |DecimalLiteral|.
+          1. Let _mv_ be the MV of _lit_.
+          1. If _mv_ is 0<sub>ℝ</sub>, return *+0*.
+          1. Return the Number value for _mv_ (as specified in <emu-xref href="#sec-ecmascript-language-types-number-type"></emu-xref>).
+        </emu-alg>
+
+        <p>A digit is <em>significant</em> if it is not part of an |ExponentPart| and</p>
         <ul>
           <li>
             it is not `0`; or
