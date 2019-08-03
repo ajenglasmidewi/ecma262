@@ -11532,12 +11532,10 @@
 
         EscapeSequence ::
           CharacterEscapeSequence
-          `0` [lookahead &lt;! DecimalDigit]
+          LegacyOctalEscapeSequence
           HexEscapeSequence
           UnicodeEscapeSequence
-      </emu-grammar>
-      <p>A conforming implementation, when processing strict mode code, must not extend the syntax of |EscapeSequence| to include <emu-xref href="#prod-annexB-LegacyOctalEscapeSequence"></emu-xref> as described in <emu-xref href="#sec-additional-syntax-string-literals"></emu-xref>.</p>
-      <emu-grammar type="definition">
+
         CharacterEscapeSequence ::
           SingleEscapeCharacter
           NonEscapeCharacter
@@ -11554,6 +11552,18 @@
           `x`
           `u`
 
+        LegacyOctalEscapeSequence ::
+          OctalDigit [lookahead &lt;! OctalDigit]
+          ZeroToThree OctalDigit [lookahead &lt;! OctalDigit]
+          FourToSeven OctalDigit
+          ZeroToThree OctalDigit OctalDigit
+
+        ZeroToThree :: one of
+          `0` `1` `2` `3`
+
+        FourToSeven :: one of
+          `4` `5` `6` `7`
+
         HexEscapeSequence ::
           `x` HexDigit HexDigit
 
@@ -11569,6 +11579,23 @@
         <p>&lt;LF&gt; and &lt;CR&gt; cannot appear in a string literal, except as part of a |LineContinuation| to produce the empty code points sequence. The proper way to include either in the String value of a string literal is to use an escape sequence such as `\\n` or `\\u000A`.</p>
       </emu-note>
 
+      <h2>Supplemental Syntax</h2>
+      <p>When processing an instance of the production <emu-grammar>LegacyOctalEscapeSequence :: OctalDigit</emu-grammar> the following production is used to refine the interpretation of |LegacyOctalEscapeSequence|.</p>
+      <emu-grammar type="definition">
+        StrictZeroEscapeSequence :: `0` [lookahead &lt;! DecimalDigit]
+      </emu-grammar>
+
+      <emu-clause id="sec-string-literals-early-errors">
+        <h1>Static Semantics: Early Errors</h1>
+        <emu-grammar>
+          EscapeSequence :: LegacyOctalEscapeSequence
+        </emu-grammar>
+        <ul>
+          <li>It is a Syntax Error if the source code matching this production is strict mode code and |EscapeSequence| is not covering a |StrictZeroEscapeSequence|.</li>
+        </ul>
+        <emu-note>In non-strict code, this syntax is allowed, but deprecated.</emu-note>
+      </emu-clause>
+
       <emu-clause id="sec-string-literals-static-semantics-stringvalue">
         <h1>Static Semantics: StringValue</h1>
         <emu-see-also-para op="StringValue"></emu-see-also-para>
@@ -11582,7 +11609,7 @@
         </emu-alg>
       </emu-clause>
 
-      <emu-clause id="sec-static-semantics-sv">
+      <emu-clause id="sec-static-semantics-sv" oldids="sec-additional-syntax-string-literals-static-semantics">
         <h1>Static Semantics: SV</h1>
         <p>A string literal stands for a value of the String type. The String value (SV) of the literal is described in terms of code unit values contributed by the various parts of the string literal. As part of this process, some Unicode code points within the string literal are interpreted as having a mathematical value (MV), as described below or in <emu-xref href="#sec-literals-numeric-literals"></emu-xref>.</p>
         <ul>
@@ -11644,7 +11671,7 @@
             The SV of <emu-grammar>EscapeSequence :: CharacterEscapeSequence</emu-grammar> is the SV of |CharacterEscapeSequence|.
           </li>
           <li>
-            The SV of <emu-grammar>EscapeSequence :: `0`</emu-grammar> is the code unit 0x0000 (NULL).
+            The SV of <emu-grammar>EscapeSequence :: LegacyOctalEscapeSequence</emu-grammar> is the SV of |LegacyOctalEscapeSequence|.
           </li>
           <li>
             The SV of <emu-grammar>EscapeSequence :: HexEscapeSequence</emu-grammar> is the SV of |HexEscapeSequence|.
@@ -11810,6 +11837,18 @@
             The SV of <emu-grammar>NonEscapeCharacter :: SourceCharacter but not one of EscapeCharacter or LineTerminator</emu-grammar> is the UTF16Encoding of the code point value of |SourceCharacter|.
           </li>
           <li>
+            The SV of <emu-grammar>LegacyOctalEscapeSequence :: OctalDigit</emu-grammar> is the code unit whose value is the MV of |OctalDigit|.
+          </li>
+          <li>
+            The SV of <emu-grammar>LegacyOctalEscapeSequence :: ZeroToThree OctalDigit</emu-grammar> is the code unit whose value is (8<sub>ℝ</sub> times the MV of |ZeroToThree|) plus the MV of |OctalDigit|.
+          </li>
+          <li>
+            The SV of <emu-grammar>LegacyOctalEscapeSequence :: FourToSeven OctalDigit</emu-grammar> is the code unit whose value is (8<sub>ℝ</sub> times the MV of |FourToSeven|) plus the MV of |OctalDigit|.
+          </li>
+          <li>
+            The SV of <emu-grammar>LegacyOctalEscapeSequence :: ZeroToThree OctalDigit OctalDigit</emu-grammar> is the code unit whose value is (64<sub>ℝ</sub> (that is, 8<sup>2</sup>) times the MV of |ZeroToThree|) plus (8<sub>ℝ</sub> times the MV of the first |OctalDigit|) plus the MV of the second |OctalDigit|.
+          </li>
+          <li>
             The SV of <emu-grammar>HexEscapeSequence :: `x` HexDigit HexDigit</emu-grammar> is the code unit whose value is (16<sub>ℝ</sub> times the MV of the first |HexDigit|) plus the MV of the second |HexDigit|.
           </li>
           <li>
@@ -11820,6 +11859,36 @@
           </li>
           <li>
             The SV of <emu-grammar>UnicodeEscapeSequence :: `u{` CodePoint `}`</emu-grammar> is the UTF16Encoding of the MV of |CodePoint|.
+          </li>
+        </ul>
+      </emu-clause>
+
+      <emu-clause id="sec-string-literals-static-semantics-mv">
+        <h1>Static Semantics: MV</h1>
+        <ul>
+          <li>
+            The MV of <emu-grammar>ZeroToThree :: `0`</emu-grammar> is 0<sub>ℝ</sub>.
+          </li>
+          <li>
+            The MV of <emu-grammar>ZeroToThree :: `1`</emu-grammar> is 1<sub>ℝ</sub>.
+          </li>
+          <li>
+            The MV of <emu-grammar>ZeroToThree :: `2`</emu-grammar> is 2<sub>ℝ</sub>.
+          </li>
+          <li>
+            The MV of <emu-grammar>ZeroToThree :: `3`</emu-grammar> is 3<sub>ℝ</sub>.
+          </li>
+          <li>
+            The MV of <emu-grammar>FourToSeven :: `4`</emu-grammar> is 4<sub>ℝ</sub>.
+          </li>
+          <li>
+            The MV of <emu-grammar>FourToSeven :: `5`</emu-grammar> is 5<sub>ℝ</sub>.
+          </li>
+          <li>
+            The MV of <emu-grammar>FourToSeven :: `6`</emu-grammar> is 6<sub>ℝ</sub>.
+          </li>
+          <li>
+            The MV of <emu-grammar>FourToSeven :: `7`</emu-grammar> is 7<sub>ℝ</sub>.
           </li>
         </ul>
       </emu-clause>
@@ -11960,10 +12029,19 @@
         CodePoint ::
           HexDigits [> but only if MV of |HexDigits| &le; 0x10FFFF ]
       </emu-grammar>
-      <p>A conforming implementation must not use the extended definition of |EscapeSequence| described in <emu-xref href="#sec-additional-syntax-string-literals"></emu-xref> when parsing a |TemplateCharacter|.</p>
       <emu-note>
         <p>|TemplateSubstitutionTail| is used by the |InputElementTemplateTail| alternative lexical goal.</p>
       </emu-note>
+
+      <emu-clause id="sec-template-literal-lexical-components-early-errors">
+        <h1>Early Errors</h1>
+        <emu-grammar>
+          TemplateCharacter ::  `\` EscapeSequence
+        </emu-grammar>
+        <ul>
+          <li>It is a Syntax Error if |EscapeSequence| is an instance of <emu-grammar>EscapeSequence :: LegacyOctalEscapeSequence</emu-grammar> and |EscapeSequence| is not covering a |StrictZeroEscapeSequence|.</li>
+        </ul>
+      </emu-clause>
 
       <emu-clause id="sec-static-semantics-tv-and-trv">
         <h1>Static Semantics: TV and TRV</h1>
@@ -12060,7 +12138,7 @@
             The TRV of <emu-grammar>EscapeSequence :: CharacterEscapeSequence</emu-grammar> is the TRV of |CharacterEscapeSequence|.
           </li>
           <li>
-            The TRV of <emu-grammar>EscapeSequence :: `0`</emu-grammar> is the code unit 0x0030 (DIGIT ZERO).
+            The TRV of <emu-grammar>EscapeSequence :: LegacyOctalEscapeSequence</emu-grammar> is the code unit 0x0030 (DIGIT ZERO).
           </li>
           <li>
             The TRV of <emu-grammar>EscapeSequence :: HexEscapeSequence</emu-grammar> is the TRV of |HexEscapeSequence|.
@@ -24871,9 +24949,6 @@
       </li>
       <li>
         The Syntactic Grammar must not be extended in any manner that allows the token `:` to immediately follow source text that matches the |BindingIdentifier| nonterminal symbol.
-      </li>
-      <li>
-        |TemplateCharacter| must not be extended to include <emu-xref href="#prod-annexB-LegacyOctalEscapeSequence"></emu-xref> as defined in <emu-xref href="#sec-additional-syntax-string-literals"></emu-xref>.
       </li>
       <li>
         When processing strict mode code, the extensions defined in <emu-xref href="#sec-labelled-function-declarations"></emu-xref>, <emu-xref href="#sec-block-level-function-declarations-web-legacy-compatibility-semantics"></emu-xref>, <emu-xref href="#sec-functiondeclarations-in-ifstatement-statement-clauses"></emu-xref>, and <emu-xref href="#sec-initializers-in-forin-statement-heads"></emu-xref> must not be supported.
@@ -41634,9 +41709,15 @@ THH:mm:ss.sss
     <emu-prodref name=SingleEscapeCharacter></emu-prodref>
     <emu-prodref name=NonEscapeCharacter></emu-prodref>
     <emu-prodref name=EscapeCharacter></emu-prodref>
+    <emu-prodref name=LegacyOctalEscapeSequence></emu-prodref>
+    <emu-prodref name=ZeroToThree></emu-prodref>
+    <emu-prodref name=FourToSeven></emu-prodref>
     <emu-prodref name=HexEscapeSequence></emu-prodref>
     <emu-prodref name=UnicodeEscapeSequence></emu-prodref>
     <emu-prodref name=Hex4Digits></emu-prodref>
+    <p>When processing an instance of the production <emu-prodref name=LegacyOctalEscapeSequence></emu-prodref> the following production is used to refine the interpretation of |LegacyOctalEscapeSequence|.</p>
+    <emu-prodref name=StrictZeroEscapeSequence></emu-prodref>
+    <p>&nbsp;</p>
     <emu-prodref name=RegularExpressionLiteral></emu-prodref>
     <emu-prodref name=RegularExpressionBody></emu-prodref>
     <emu-prodref name=RegularExpressionChars></emu-prodref>
@@ -41969,73 +42050,11 @@ THH:mm:ss.sss
 
     <emu-annex id="sec-additional-syntax-string-literals">
       <h1>String Literals</h1>
-      <p>The syntax and semantics of <emu-xref href="#sec-literals-string-literals"></emu-xref> is extended as follows except that this extension is not allowed for strict mode code:</p>
-      <h2>Syntax</h2>
-      <emu-grammar type="definition">
-        EscapeSequence ::
-          CharacterEscapeSequence
-          LegacyOctalEscapeSequence
-          HexEscapeSequence
-          UnicodeEscapeSequence
-
-        LegacyOctalEscapeSequence ::
-          OctalDigit [lookahead &lt;! OctalDigit]
-          ZeroToThree OctalDigit [lookahead &lt;! OctalDigit]
-          FourToSeven OctalDigit
-          ZeroToThree OctalDigit OctalDigit
-
-        ZeroToThree :: one of
-          `0` `1` `2` `3`
-
-        FourToSeven :: one of
-          `4` `5` `6` `7`
+      <p>The following syntax from <emu-xref href="#sec-literals-string-literals"></emu-xref>, and its associated semantics, used to be normative optional:</p>
+      <emu-grammar>
+        EscapeSequence :: LegacyOctalEscapeSequence
       </emu-grammar>
-      <p>This definition of |EscapeSequence| is not used in strict mode or when parsing |TemplateCharacter|.</p>
-
-      <emu-annex id="sec-additional-syntax-string-literals-static-semantics">
-        <h1>Static Semantics</h1>
-        <ul>
-          <li>
-            The SV of <emu-grammar>EscapeSequence :: LegacyOctalEscapeSequence</emu-grammar> is the SV of |LegacyOctalEscapeSequence|.
-          </li>
-          <li>
-            The SV of <emu-grammar>LegacyOctalEscapeSequence :: OctalDigit</emu-grammar> is the code unit whose value is the MV of |OctalDigit|.
-          </li>
-          <li>
-            The SV of <emu-grammar>LegacyOctalEscapeSequence :: ZeroToThree OctalDigit</emu-grammar> is the code unit whose value is (8 times the MV of |ZeroToThree|) plus the MV of |OctalDigit|.
-          </li>
-          <li>
-            The SV of <emu-grammar>LegacyOctalEscapeSequence :: FourToSeven OctalDigit</emu-grammar> is the code unit whose value is (8 times the MV of |FourToSeven|) plus the MV of |OctalDigit|.
-          </li>
-          <li>
-            The SV of <emu-grammar>LegacyOctalEscapeSequence :: ZeroToThree OctalDigit OctalDigit</emu-grammar> is the code unit whose value is (64 (that is, 8<sup>2</sup>) times the MV of |ZeroToThree|) plus (8 times the MV of the first |OctalDigit|) plus the MV of the second |OctalDigit|.
-          </li>
-          <li>
-            The MV of <emu-grammar>ZeroToThree :: `0`</emu-grammar> is 0.
-          </li>
-          <li>
-            The MV of <emu-grammar>ZeroToThree :: `1`</emu-grammar> is 1.
-          </li>
-          <li>
-            The MV of <emu-grammar>ZeroToThree :: `2`</emu-grammar> is 2.
-          </li>
-          <li>
-            The MV of <emu-grammar>ZeroToThree :: `3`</emu-grammar> is 3.
-          </li>
-          <li>
-            The MV of <emu-grammar>FourToSeven :: `4`</emu-grammar> is 4.
-          </li>
-          <li>
-            The MV of <emu-grammar>FourToSeven :: `5`</emu-grammar> is 5.
-          </li>
-          <li>
-            The MV of <emu-grammar>FourToSeven :: `6`</emu-grammar> is 6.
-          </li>
-          <li>
-            The MV of <emu-grammar>FourToSeven :: `7`</emu-grammar> is 7.
-          </li>
-        </ul>
-      </emu-annex>
+      <p>and the productions for |LegacyOctalEscapeSequence|, |ZeroToThree|, and |FourToSeven|.</p>
     </emu-annex>
 
     <emu-annex id="sec-html-like-comments">
@@ -42235,7 +42254,7 @@ THH:mm:ss.sss
         </emu-alg>
         <emu-grammar>CharacterEscape :: LegacyOctalEscapeSequence</emu-grammar>
         <emu-alg>
-          1. Evaluate the SV of |LegacyOctalEscapeSequence| (see <emu-xref href="#sec-additional-syntax-string-literals"></emu-xref>) to obtain a code unit _cu_.
+          1. Evaluate the SV of |LegacyOctalEscapeSequence| (see <emu-xref href="#sec-static-semantics-sv"></emu-xref>) to obtain a code unit _cu_.
           1. Return the numeric value of _cu_.
         </emu-alg>
       </emu-annex>
@@ -43211,7 +43230,7 @@ THH:mm:ss.sss
       A conforming implementation, when processing strict mode code, must disallow instances of the productions <emu-grammar>NumericLiteral :: LegacyOctalIntegerLiteral</emu-grammar> and <emu-grammar>DecimalIntegerLiteral :: NonOctalDecimalIntegerLiteral</emu-grammar>.
     </li>
     <li>
-      A conforming implementation, when processing strict mode code, may not extend the syntax of |EscapeSequence| to include |LegacyOctalEscapeSequence| as described in <emu-xref href="#sec-additional-syntax-string-literals"></emu-xref>.
+      A conforming implementation, when processing strict mode code, must disallow instances of the production <emu-grammar>EscapeSequence :: LegacyOctalEscapeSequence</emu-grammar> that do not cover a |StrictZeroEscapeSequence|.
     </li>
     <li>
       Assignment to an undeclared identifier or otherwise unresolvable reference does not create a property in the global object. When a simple assignment occurs within strict mode code, its |LeftHandSideExpression| must not evaluate to an unresolvable Reference. If it does a *ReferenceError* exception is thrown (<emu-xref href="#sec-putvalue"></emu-xref>). The |LeftHandSideExpression| also may not be a reference to a data property with the attribute value { [[Writable]]: *false* }, to an accessor property with the attribute value { [[Set]]: *undefined* }, nor to a non-existent property of an object whose [[Extensible]] internal slot has the value *false*. In these cases a `TypeError` exception is thrown (<emu-xref href="#sec-assignment-operators"></emu-xref>).
