@@ -1349,7 +1349,7 @@
         <p>The actual semantics of objects, in ECMAScript, are specified via algorithms called <em>internal methods</em>. Each object in an ECMAScript engine is associated with a set of internal methods that defines its runtime behaviour. These internal methods are not part of the ECMAScript language. They are defined by this specification purely for expository purposes. However, each object within an implementation of ECMAScript must behave as specified by the internal methods associated with it. The exact manner in which this is accomplished is determined by the implementation.</p>
         <p>Internal method names are polymorphic. This means that different object values may perform different algorithms when a common internal method name is invoked upon them. That actual object upon which an internal method is invoked is the &ldquo;target&rdquo; of the invocation. If, at runtime, the implementation of an algorithm attempts to use an internal method of an object that the object does not support, a *TypeError* exception is thrown.</p>
         <p>Internal slots correspond to internal state that is associated with objects and used by various ECMAScript specification algorithms. Internal slots are not object properties and they are not inherited. Depending upon the specific internal slot specification, such state may consist of values of any ECMAScript language type or of specific ECMAScript specification type values. Unless explicitly specified otherwise, internal slots are allocated as part of the process of creating an object and may not be dynamically added to an object. Unless specified otherwise, the initial value of an internal slot is the value *undefined*. Various algorithms within this specification create objects that have internal slots. However, the ECMAScript language provides no direct way to associate internal slots with an object.</p>
-        <p>All objects have an internal slot named [[PrivateFieldValues]], which is a List of Records of the form { [[PrivateName]]: Private Name, [[PrivateFieldValue]]: ECMAScript value }. This List represents the values of the private fields for the object. Initially, it is an empty List.</p>
+        <p>All objects have an internal slot named [[PrivateFieldValues]], which is a List of PrivateField Records. This List represents the values of the private fields for the object. Initially, it is an empty List.</p>
         <p>Internal methods and internal slots are identified within this specification using names enclosed in double square brackets [[ ]].</p>
         <p><emu-xref href="#table-5"></emu-xref> summarizes the <em>essential internal methods</em> used by this specification that are applicable to all objects created or manipulated by ECMAScript code. Every object must have algorithms for all of the essential internal methods. However, all objects do not necessarily use the same algorithms for those methods.</p>
         <p>The &ldquo;Signature&rdquo; column of <emu-xref href="#table-5"></emu-xref> and other similar tables describes the invocation pattern for each internal method. The invocation pattern always includes a parenthesized list of descriptive parameter names. If a parameter name is the same as an ECMAScript type name then the name describes the required type of the parameter value. If an internal method explicitly returns a value, its parameter list is followed by the symbol &ldquo;&rarr;&rdquo; and the type name of the returned value. The type names used in signatures refer to the types defined in clause <emu-xref href="#sec-ecmascript-data-types-and-values"></emu-xref> augmented by the following additional names. &ldquo;<em>any</em>&rdquo; means the value may be any ECMAScript language type.</p>
@@ -3288,9 +3288,8 @@
               1. Set _base_ to ! ToObject(_base_).
             1. If IsPrivateReference(_V_), then
               1. Return ? PrivateFieldSet(GetReferencedName(_V_), _base_, _W_).
-            1. Else,
-              1. Let _succeeded_ be ? _base_.[[Set]](GetReferencedName(_V_), _W_, GetThisValue(_V_)).
-              1. If _succeeded_ is *false* and IsStrictReference(_V_) is *true*, throw a *TypeError* exception.
+            1. Let _succeeded_ be ? _base_.[[Set]](GetReferencedName(_V_), _W_, GetThisValue(_V_)).
+            1. If _succeeded_ is *false* and IsStrictReference(_V_) is *true*, throw a *TypeError* exception.
             1. Return.
           1. Else,
             1. Assert: _base_ is an Environment Record.
@@ -3325,7 +3324,7 @@
       </emu-clause>
 
       <!--
-      1. Replace all occurances of "Return a value of type Reference..." with calls to MakeReference
+      1. Replace all occurences of "Return a value of type Reference..." with calls to MakeReference
       2. Rename MakeSuperPropertyReference to MakeSuperReference for consistency.
 
       <emu-clause id="sec-makereference" aoid="MakeReference">
@@ -3341,7 +3340,7 @@
         <emu-alg>
           1. Let _env_ be the running execution context's PrivateEnvironment.
           1. Let _privateNameBinding_ be ? ResolveBinding(_privateIdentifier_, _env_).
-          1. Let _privateName_ be GetValue(_privateNameBinding_).
+          1. Let _privateName_ be ? GetValue(_privateNameBinding_).
           1. Assert: _privateName_ is a Private Name.
           1. Return a value of type Reference whose base value is _baseValue_, whose referenced name is _privateName_, whose strict reference flag is *true*.
         </emu-alg>
@@ -3537,6 +3536,51 @@
           1. Return NormalCompletion(~empty~).
         </emu-alg>
       </emu-clause>
+    </emu-clause>
+
+    <emu-clause id="sec-privatefield-record-specification-type" aoid="PrivateField">
+      <h1>The PrivateField Record Specification Type</h1>
+      <p>The PrivateField type is a Record used in the specification of private class fiels..</p>
+      <p>Values of the Completion type are Record values whose fields are defined as by <emu-xref href="#table-privatefield-fields"></emu-xref>. Such values are referred to as <dfn>PrivateField Record</dfn>s.</p>
+      <emu-table id="table-privatefield-fields" caption="PrivateField Record Fields">
+        <table>
+          <tbody>
+          <tr>
+            <th>
+              Field Name
+            </th>
+            <th>
+              Value
+            </th>
+            <th>
+              Meaning
+            </th>
+          </tr>
+          <tr>
+            <td>
+              [[PrivateName]]
+            </td>
+            <td>
+              a Private Name
+            </td>
+            <td>
+              The name of the field.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              [[PrivateFieldValue]]
+            </td>
+            <td>
+              any ECMAScript language value
+            </td>
+            <td>
+              The value of the field.
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </emu-table>
     </emu-clause>
 
     <emu-clause id="sec-private-names">
@@ -5003,6 +5047,7 @@
     <emu-clause id="sec-newprivatename" aoid="NewPrivateName">
       <h1>NewPrivateName ( _description_ )</h1>
       <emu-alg>
+        1. Assert: Type(_description_) is String.
         1. Return a new unique Private Name whose [[Description]] value is _description_.
       </emu-alg>
     </emu-clause>
@@ -5023,7 +5068,7 @@
       <emu-alg>
         1. Assert: _P_ is a Private Name.
         1. Assert: Type(_O_) is Object.
-        1. Let _entry_ be PrivateFieldFind(_P_, _O_).
+        1. Let _entry_ be ! PrivateFieldFind(_P_, _O_).
         1. If _entry_ is not ~empty~, throw a *TypeError* exception.
         1. Append { [[PrivateName]]: P, [[PrivateFieldValue]]: _value_ } to _O_.[[PrivateFieldValues]].
       </emu-alg>
@@ -5034,7 +5079,7 @@
       <emu-alg>
         1. Assert: _P_ is a Private Name.
         1. Assert: Type(_O_) is Object.
-        1. Let _entry_ be PrivateFieldFind(_P_, _O_).
+        1. Let _entry_ be ! PrivateFieldFind(_P_, _O_).
         1. If _entry_ is ~empty~, throw a *TypeError* exception.
         1. Return _entry_.[[PrivateFieldValue]].
       </emu-alg>
@@ -5045,7 +5090,7 @@
       <emu-alg>
         1. Assert: _P_ is a Private Name.
         1. Assert: Type(_O_) is Object.
-        1. Let _entry_ be PrivateFieldFind(_P_, _O_).
+        1. Let _entry_ be ! PrivateFieldFind(_P_, _O_).
         1. If _entry_ is ~empty~, throw a *TypeError* exception.
         1. Set _entry_.[[PrivateFieldValue]] to _value_.
       </emu-alg>
@@ -5063,11 +5108,11 @@
         1. Else, let _initValue_ be *undefined*.
         1. If _fieldRecord_.[[IsAnonymousFunctionDefinition]] is *true*, then
           1. Let _hasNameProperty_ be ? HasOwnProperty(_initValue_, `"name"`).
-          1. If _hasNameProperty_ is *false*, perform SetFunctionName(_initValue_, _fieldName_).
+          1. If _hasNameProperty_ is *false*, perform ! SetFunctionName(_initValue_, _fieldName_).
         1. If _fieldName_ is a Private Name,
           1. Perform ? PrivateFieldAdd(_fieldName_, _receiver_, _initValue_).
         1. Else,
-          1. Assert: IsPropertyKey(_fieldName_) is *true*.
+          1. Assert: ! IsPropertyKey(_fieldName_) is *true*.
           1. Perform ? CreateDataPropertyOrThrow(_receiver_, _fieldName_, _initValue_).
       </emu-alg>
     </emu-clause>
@@ -7552,7 +7597,7 @@
             List of Records as created by ClassFieldDefinitionEvaluation
           </td>
           <td>
-            If the function is a class with instancefield declarations, this is a list of records representing those fields and their initializers.
+            If the function is a class with instance field declarations, this is a list of records representing those fields and their initializers.
           </td>
         </tr>
         <tr>
@@ -12811,7 +12856,7 @@
           1. Let _baseValue_ be ? GetValue(_baseReference_).
           1. Let _bv_ be ? RequireObjectCoercible(_baseValue_).
           1. Let _fieldNameString_ be the StringValue of |PrivateIdentifier|.
-          1. Return MakePrivateReference(_bv_, _fieldNameString_).
+          1. Return ? MakePrivateReference(_bv_, _fieldNameString_).
         </emu-alg>
         <emu-grammar>CallExpression : CallExpression `[` Expression `]`</emu-grammar>
         <p>Is evaluated in exactly the same manner as <emu-grammar>MemberExpression : MemberExpression `[` Expression `]`</emu-grammar> except that the contained |CallExpression| is evaluated in step 1.</p>
@@ -12823,7 +12868,7 @@
           1. Let _baseValue_ be ? GetValue(_baseReference_).
           1. Let _bv_ be ? RequireObjectCoercible(_baseValue_).
           1. Let _fieldNameString_ be the StringValue of |PrivateIdentifier|.
-          1. Return MakePrivateReference(_bv_, _fieldNameString_).
+          1. Return ? MakePrivateReference(_bv_, _fieldNameString_).
         </emu-alg>
       </emu-clause>
     </emu-clause>
@@ -13317,7 +13362,7 @@
             1. Assert: IsStrictReference(_ref_) is *false*.
             1. Return *true*.
           1. If IsPropertyReference(_ref_) is *true*, then
-            1. Assert: IsPrivateReference(_ref_) is *false*.
+            1. Assert: ! IsPrivateReference(_ref_) is *false*.
             1. If IsSuperReference(_ref_) is *true*, throw a *ReferenceError* exception.
             1. Let _baseObj_ be ! ToObject(GetBase(_ref_)).
             1. Let _deleteStatus_ be ? _baseObj_.[[Delete]](GetReferencedName(_ref_)).
