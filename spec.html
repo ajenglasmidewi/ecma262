@@ -3540,8 +3540,8 @@
 
     <emu-clause id="sec-privatefield-record-specification-type" aoid="PrivateField">
       <h1>The PrivateField Record Specification Type</h1>
-      <p>The PrivateField type is a Record used in the specification of private class fiels..</p>
-      <p>Values of the Completion type are Record values whose fields are defined as by <emu-xref href="#table-privatefield-fields"></emu-xref>. Such values are referred to as <dfn>PrivateField Record</dfn>s.</p>
+      <p>The PrivateField type is a Record used in the specification of private class fields.</p>
+      <p>Values of the PrivateField type are Record values whose fields are defined as by <emu-xref href="#table-privatefield-fields"></emu-xref>. Such values are referred to as <dfn>PrivateField Record</dfn>s.</p>
       <emu-table id="table-privatefield-fields" caption="PrivateField Record Fields">
         <table>
           <tbody>
@@ -3576,6 +3576,62 @@
             </td>
             <td>
               The value of the field.
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </emu-table>
+    </emu-clause>
+
+    <emu-clause id="sec-classfielddefinition-record-specification-type" aoid="ClassFieldDefinition">
+      <h1>The ClassFieldDefinition Record Specification Type</h1>
+      <p>The ClassFieldDefinition type is a Record used in the specification of class fields.</p>
+      <p>Values of the ClassFieldDefinition type are Record values whose fields are defined as by <emu-xref href="#table-classfielddefinition-fields"></emu-xref>. Such values are referred to as <dfn>ClassFieldDefinition Record</dfn>s.</p>
+      <emu-table id="table-classfielddefinition-fields" caption="ClassFieldDefinition Record Fields">
+        <table>
+          <tbody>
+          <tr>
+            <th>
+              Field Name
+            </th>
+            <th>
+              Value
+            </th>
+            <th>
+              Meaning
+            </th>
+          </tr>
+          <tr>
+            <td>
+              [[Name]]
+            </td>
+            <td>
+              a Private Name, a String value, or a Symbol value.
+            </td>
+            <td>
+              The name of the field.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              [[Initializer]]
+            </td>
+            <td>
+              an ECMAScript function object, or ~empty~
+            </td>
+            <td>
+              The initializer of the field, if any.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              [[IsAnonymousFunctionDefinition]]
+            </td>
+            <td>
+              Boolean
+            </td>
+            <td>
+              *true* if there is an Initializer and it is a function definition that does not bind a name, *false* otherwise.
             </td>
           </tr>
           </tbody>
@@ -5100,8 +5156,8 @@
       <h1>DefineField ( _receiver_, _fieldRecord_ )</h1>
       <emu-alg>
         1. Assert: Type(_receiver_) is Object.
-        1. Assert: _fieldRecord_ is a Record as created by ClassFieldDefinitionEvaluation.
-        1. Let _name_ be _fieldRecord_.[[Name]].
+        1. Assert: _fieldRecord_ is a ClassFieldDefinition Record.
+        1. Let _fieldName_ be _fieldRecord_.[[Name]].
         1. Let _initializer_ be _fieldRecord_.[[Initializer]].
         1. If _initializer_ is not ~empty~, then
           1. Let _initValue_ be ? Call(_initializer_, _receiver_).
@@ -7594,7 +7650,7 @@
             [[Fields]]
           </td>
           <td>
-            List of Records as created by ClassFieldDefinitionEvaluation
+            List of ClassFieldDefinition Records
           </td>
           <td>
             If the function is a class with instance field declarations, this is a list of records representing those fields and their initializers.
