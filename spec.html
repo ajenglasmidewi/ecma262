@@ -12820,6 +12820,7 @@
           CallExpression :
             CallExpression `[` Expression `]`
             CallExpression `.` IdentifierName
+            CallExpression `.` PrivateIdentifier
 
           MemberExpression :
             MemberExpression `[` Expression `]`
@@ -21511,6 +21512,7 @@
             SuperCall
             CallExpression `[` Expression `]`
             CallExpression `.` IdentifierName
+            CallExpression `.` PrivateIdentifier
 
           NewExpression : `new` NewExpression
 
