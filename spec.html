@@ -20213,6 +20213,12 @@
       <emu-alg>
         1. Return *false*.
       </emu-alg>
+      <emu-grammar>
+        FieldDefinition : ClassElementName Initializer?
+      </emu-grammar>
+      <emu-alg>
+        1. Return the result of ComputedPropertyContains for |ClassElementName| with argument _symbol_.
+      </emu-alg>
     </emu-clause>
 
     <emu-clause id="sec-class-definitions-static-semantics-hasname">
