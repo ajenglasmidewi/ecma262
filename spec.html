@@ -20094,6 +20094,9 @@
         <li>
           It is a Syntax Error if PrototypePropertyNameList of |ClassElementList| contains more than one occurrence of `"constructor"`.
         </li>
+        <li>
+          It is a Syntax Error if PrivateBoundIdentifiers of |ClassElementList| contains any duplicate entries.
+        </li>
       </ul>
       <emu-grammar>ClassElement : MethodDefinition</emu-grammar>
       <ul>
@@ -20113,6 +20116,12 @@
           It is a Syntax Error if PropName of |MethodDefinition| is `"prototype"`.
         </li>
       </ul>
+
+      <emu-grammar>ClassElement : FieldDefinition `;`</emu-grammar>
+      <ul>
+        <li>It is a Syntax Error if PropName of |FieldDefinition| is `"constructor"`.</li>
+      </ul>
+
       <emu-grammar>
         FieldDefinition :
           ClassElementName Initializer?
@@ -20120,18 +20129,6 @@
       <ul>
         <li>It is a Syntax Error if ContainsArguments of |Initializer| is *true*.</li>
         <li>It is a Syntax Error if |Initializer| is present and |Initializer| Contains |SuperCall| is *true*.</li>
-      </ul>
-
-      <emu-grammar>
-        ClassBody : ClassElementList
-      </emu-grammar>
-      <ul>
-        <li>It is a Syntax Error if PrivateBoundIdentifiers of |ClassBody| contains any duplicate entries.</li>
-      </ul>
-
-      <emu-grammar>ClassElement : FieldDefinition `;`</emu-grammar>
-      <ul>
-        <li>It is a Syntax Error if PropName of |FieldDefinition| is `"constructor"`.</li>
       </ul>
 
       <emu-grammar>ClassElementName : PrivateIdentifier `;`</emu-grammar>
