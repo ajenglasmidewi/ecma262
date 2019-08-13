@@ -12747,6 +12747,7 @@
             SuperProperty
             MetaProperty
             `new` MemberExpression Arguments
+            MemberExpression `.` PrivateIdentifier
 
           NewExpression :
             `new` NewExpression
@@ -12775,6 +12776,7 @@
             SuperProperty
             MetaProperty
             `new` MemberExpression Arguments
+            MemberExpression `.` PrivateIdentifier
 
           NewExpression :
             `new` NewExpression
@@ -12798,6 +12800,7 @@
             SuperProperty
             MetaProperty
             `new` MemberExpression Arguments
+            MemberExpression `.` PrivateIdentifier
 
           NewExpression :
             `new` NewExpression
@@ -12822,6 +12825,7 @@
             MemberExpression `[` Expression `]`
             MemberExpression `.` IdentifierName
             SuperProperty
+            MemberExpression `.` PrivateIdentifier
         </emu-grammar>
         <emu-alg>
           1. Return ~simple~.
@@ -21516,6 +21520,7 @@
             SuperProperty
             MetaProperty
             `new` MemberExpression Arguments
+            MemberExpression `.` PrivateIdentifier
 
           PrimaryExpression :
             `this`
