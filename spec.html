@@ -1350,6 +1350,16 @@
         <p>Internal method names are polymorphic. This means that different object values may perform different algorithms when a common internal method name is invoked upon them. That actual object upon which an internal method is invoked is the &ldquo;target&rdquo; of the invocation. If, at runtime, the implementation of an algorithm attempts to use an internal method of an object that the object does not support, a *TypeError* exception is thrown.</p>
         <p>Internal slots correspond to internal state that is associated with objects and used by various ECMAScript specification algorithms. Internal slots are not object properties and they are not inherited. Depending upon the specific internal slot specification, such state may consist of values of any ECMAScript language type or of specific ECMAScript specification type values. Unless explicitly specified otherwise, internal slots are allocated as part of the process of creating an object and may not be dynamically added to an object. Unless specified otherwise, the initial value of an internal slot is the value *undefined*. Various algorithms within this specification create objects that have internal slots. However, the ECMAScript language provides no direct way to associate internal slots with an object.</p>
         <p>All objects have an internal slot named [[PrivateFieldValues]], which is a List of PrivateField Records. This List represents the values of the private fields for the object. Initially, it is an empty List.</p>
+        <p>All objects have an internal slot named [[PrivateBrands]], which is a List of ECMAScript values which are used for checking to see if an object supports a private method or accessor. The entries in the list correspond to the "original prototype" (or, in the case of static methods, the "original constructor") which contained the private method or accessor. Initially, it is an empty List.</p>
+        <emu-note>
+          <p>Although this specification uses logic of a [[PrivateBrand]] List which is held per-instance, the use of this list obeys certain invariants:</p>
+
+          <ul>
+            <li>Nothing is removed from the list; things are only added to the end.</li>
+            <li>There is no way to distinguish different copies of the list.</li>
+            <li>The list is mutable, but there are never any references to it outside of the particular object which holds it, so additions can be thought of as replacing the internal slot with another list which contains the new element.</li>
+          </ul>
+        </emu-note>
         <p>Internal methods and internal slots are identified within this specification using names enclosed in double square brackets [[ ]].</p>
         <p><emu-xref href="#table-5"></emu-xref> summarizes the <em>essential internal methods</em> used by this specification that are applicable to all objects created or manipulated by ECMAScript code. Every object must have algorithms for all of the essential internal methods. However, all objects do not necessarily use the same algorithms for those methods.</p>
         <p>The &ldquo;Signature&rdquo; column of <emu-xref href="#table-5"></emu-xref> and other similar tables describes the invocation pattern for each internal method. The invocation pattern always includes a parenthesized list of descriptive parameter names. If a parameter name is the same as an ECMAScript type name then the name describes the required type of the parameter value. If an internal method explicitly returns a value, its parameter list is followed by the symbol &ldquo;&rarr;&rdquo; and the type name of the returned value. The type names used in signatures refer to the types defined in clause <emu-xref href="#sec-ecmascript-data-types-and-values"></emu-xref> augmented by the following additional names. &ldquo;<em>any</em>&rdquo; means the value may be any ECMAScript language type.</p>
@@ -3641,7 +3651,7 @@
 
     <emu-clause id="sec-private-names">
       <h1>Private Names</h1>
-      <p>The <dfn>Private Name</dfn> specification type is used to describe a globally unique record which represents a private field. A Private Name may be installed on any ECMAScript object with the PrivateFieldAdd internal algorithm, and then read or written using PrivateFieldGet and PrivateFieldSet.</p>
+      <p>The <dfn>Private Name</dfn> specification type is used to describe a globally unique record which represents a private class element (field, method, or accessor). A Private Name may be installed on any ECMAScript object with the PrivateFieldAdd internal algorithm, and then read or written using PrivateFieldGet and PrivateFieldSet.</p>
 
       <p>Each Private Name holds the following information:</p>
       <emu-table id="private-record" caption="Fields of the Private Name">
@@ -3653,6 +3663,9 @@
             </th>
             <th>
               Type
+            </th>
+            <th>
+              For which types is it present
             </th>
             <th>
               Description
@@ -3668,7 +3681,80 @@
               ~string~
             </td>
             <td>
+              All
+            </td>
+            <td>
               The string value passed to NewPrivateName when creating this Private Name.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              [[Kind]]
+            </td>
+            <td>
+              `"field"`, `"method"` or `"accessor"`
+            </td>
+            <td>
+              All
+            </td>
+            <td>
+              Indicates what the private name is used for.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              [[Brand]]
+            </td>
+            <td>
+              an ECMAScript value
+            </td>
+            <td>
+              `"method"` or `"accessor"`
+            </td>
+            <td>
+              The "original" class of the private method or accessor; checked for in the [[PrivateBrands]] internal slot of instances before access is provided.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              [[Value]]
+            </td>
+            <td>
+              Function
+            </td>
+            <td>
+              `"method"`
+            </td>
+            <td>
+              The value of the private method.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              [[Get]]
+            </td>
+            <td>
+              Function
+            </td>
+            <td>
+              `"accessor"`
+            </td>
+            <td>
+              The getter for a private accessor.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              [[Set]]
+            </td>
+            <td>
+              Function
+            </td>
+            <td>
+              `"accessor"`
+            </td>
+            <td>
+              The setter for a private accessor.
             </td>
           </tr>
           </tbody>
@@ -5135,9 +5221,18 @@
       <emu-alg>
         1. Assert: _P_ is a Private Name.
         1. Assert: Type(_O_) is Object.
-        1. Let _entry_ be ! PrivateFieldFind(_P_, _O_).
-        1. If _entry_ is ~empty~, throw a *TypeError* exception.
-        1. Return _entry_.[[PrivateFieldValue]].
+        1. If _P_.[[Kind]] is `"field"`,
+          1. Let _entry_ be ! PrivateFieldFind(_P_, _O_).
+          1. If _entry_ is ~empty~, throw a *TypeError* exception.
+          1. Return _entry_.[[PrivateFieldValue]].
+        1. Perform ? PrivateBrandCheck(_O_, _P_).
+        1. If _P_.[[Kind]] is `"method"`,
+          1. Return _P_.[[Value]].
+        1. Else,
+          1. Assert: _P_.[[Kind]] is `"accessor"`.
+          1. If _P_ does not have a [[Get]] field, throw a *TypeError* exception.
+          1. Let _getter_ be _P_.[[Get]].
+          1. Return ? Call(_getter_, _O_).
       </emu-alg>
     </emu-clause>
 
@@ -5146,9 +5241,19 @@
       <emu-alg>
         1. Assert: _P_ is a Private Name.
         1. Assert: Type(_O_) is Object.
-        1. Let _entry_ be ! PrivateFieldFind(_P_, _O_).
-        1. If _entry_ is ~empty~, throw a *TypeError* exception.
-        1. Set _entry_.[[PrivateFieldValue]] to _value_.
+        1. If _P_.[[Kind]] is `"field"`,
+          1. Let _entry_ be ! PrivateFieldFind(_P_, _O_).
+          1. If _entry_ is ~empty~, throw a *TypeError* exception.
+          1. Set _entry_.[[PrivateFieldValue]] to _value_.
+          1. Return.
+        1. If _P_.[[Kind]] is `"method"`, throw a *TypeError* exception.
+        1. Else,
+          1. Assert: _P_.[[Kind]] is `"accessor"`.
+          1. Perform ? PrivateBrandCheck(_O_, _P_).
+          1. If _P_ does not have a [[Set]] field, throw a *TypeError* exception.
+          1. Let _setter_ be _P_.[[Set]].
+          1. Perform ? Call(_setter_, _O_, _value_).
+          1. Return.
       </emu-alg>
     </emu-clause>
 
@@ -5178,9 +5283,28 @@
       <emu-alg>
         1. Assert: Type(_O_) is Object.
         1. Assert: _constructor_ is an ECMAScript function object.
+        1. If _constructor_.[[PrivateBrand]] is not *undefined*,
+          1. Perform ? PrivateBrandAdd(_O_, _constructor_.[[PrivateBrand]]).
         1. Let _fields_ be the value of _constructor_.[[Fields]].
         1. For each item _fieldRecord_ in order from _fields_,
           1. Perform ? DefineField(_O_, _fieldRecord_).
+      </emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-privatebrandcheck" aoid="PrivateBrandCheck">
+      <h1>PrivateBrandCheck ( _O_, _P_ )</h1>
+      <emu-alg>
+        1. If _O_.[[PrivateBrands]] does not contain an entry _e_ such that SameValue(_e_, _P_.[[Brand]]) is *true*,
+          1. Throw a *TypeError* exception.
+      </emu-alg>
+    </emu-clause>
+
+    <emu-clause id="sec-privatebrandadd" aoid="PrivateBrandAdd">
+      <h1>PrivateBrandAdd ( _O_, _brand_ )</h1>
+      <emu-alg>
+        1. If _O_.[[PrivateBrands]] contains an entry _e_ such that SameValue(_e_, _brand_) is *true*,
+          1. Throw a *TypeError* exception.
+        1. Append _brand_ to _O_.[[PrivateBrands]].
       </emu-alg>
     </emu-clause>
   </emu-clause>
@@ -12067,6 +12191,9 @@
         <ul>
           <li>
             It is a Syntax Error if HasDirectSuper of |MethodDefinition| is *true*.
+          </li>
+          <li>
+            It is a Syntax Error if PrivateBoundIdentifiers of |MethodDefinition| is non-empty.
           </li>
         </ul>
         <p>In addition to describing an actual object initializer the |ObjectLiteral| productions are also used as a cover grammar for |ObjectAssignmentPattern| and may be recognized as part of a |CoverParenthesizedExpressionAndArrowParameterList|. When |ObjectLiteral| appears in a context where |ObjectAssignmentPattern| is required the following Early Error rules are <b>not</b> applied. In addition, they are not applied when initially parsing a |CoverParenthesizedExpressionAndArrowParameterList| or |CoverCallExpressionAndAsyncArrowHead|.</p>
@@ -19228,12 +19355,12 @@
     <h2>Syntax</h2>
     <emu-grammar type="definition">
       MethodDefinition[Yield, Await] :
-        PropertyName[?Yield, ?Await] `(` UniqueFormalParameters[~Yield, ~Await] `)` `{` FunctionBody[~Yield, ~Await] `}`
+        ClassElementName[?Yield, ?Await] `(` UniqueFormalParameters[~Yield, ~Await] `)` `{` FunctionBody[~Yield, ~Await] `}`
         GeneratorMethod[?Yield, ?Await]
         AsyncMethod[?Yield, ?Await]
         AsyncGeneratorMethod[?Yield, ?Await]
-        `get` PropertyName[?Yield, ?Await] `(` `)` `{` FunctionBody[~Yield, ~Await] `}`
-        `set` PropertyName[?Yield, ?Await] `(` PropertySetParameterList `)` `{` FunctionBody[~Yield, ~Await] `}`
+        `get` ClassElementName[?Yield, ?Await] `(` `)` `{` FunctionBody[~Yield, ~Await] `}`
+        `set` ClassElementName[?Yield, ?Await] `(` PropertySetParameterList `)` `{` FunctionBody[~Yield, ~Await] `}`
 
       PropertySetParameterList :
         FormalParameter[~Yield, ~Await]
@@ -19241,7 +19368,7 @@
 
     <emu-clause id="sec-method-definitions-static-semantics-early-errors">
       <h1>Static Semantics: Early Errors</h1>
-      <emu-grammar>MethodDefinition : PropertyName `(` UniqueFormalParameters `)` `{` FunctionBody `}`</emu-grammar>
+      <emu-grammar>MethodDefinition : ClassElementName `(` UniqueFormalParameters `)` `{` FunctionBody `}`</emu-grammar>
       <ul>
         <li>
           It is a Syntax Error if ContainsUseStrict of |FunctionBody| is *true* and IsSimpleParameterList of |UniqueFormalParameters| is *false*.
@@ -19250,7 +19377,7 @@
           It is a Syntax Error if any element of the BoundNames of |UniqueFormalParameters| also occurs in the LexicallyDeclaredNames of |FunctionBody|.
         </li>
       </ul>
-      <emu-grammar>MethodDefinition : `set` PropertyName `(` PropertySetParameterList `)` `{` FunctionBody `}`</emu-grammar>
+      <emu-grammar>MethodDefinition : `set` ClassElementName `(` PropertySetParameterList `)` `{` FunctionBody `}`</emu-grammar>
       <ul>
         <li>
           It is a Syntax Error if BoundNames of |PropertySetParameterList| contains any duplicate elements.
@@ -19270,12 +19397,12 @@
       <emu-see-also-para op="ComputedPropertyContains"></emu-see-also-para>
       <emu-grammar>
         MethodDefinition :
-          PropertyName `(` UniqueFormalParameters `)` `{` FunctionBody `}`
-          `get` PropertyName `(` `)` `{` FunctionBody `}`
-          `set` PropertyName `(` PropertySetParameterList `)` `{` FunctionBody `}`
+          ClassElementName `(` UniqueFormalParameters `)` `{` FunctionBody `}`
+          `get` ClassElementName `(` `)` `{` FunctionBody `}`
+          `set` ClassElementName `(` PropertySetParameterList `)` `{` FunctionBody `}`
       </emu-grammar>
       <emu-alg>
-        1. Return the result of ComputedPropertyContains for |PropertyName| with argument _symbol_.
+        1. Return the result of ComputedPropertyContains for |ClassElementName| with argument _symbol_.
       </emu-alg>
     </emu-clause>
 
@@ -19292,16 +19419,16 @@
     <emu-clause id="sec-method-definitions-static-semantics-hasdirectsuper">
       <h1>Static Semantics: HasDirectSuper</h1>
       <emu-see-also-para op="HasDirectSuper"></emu-see-also-para>
-      <emu-grammar>MethodDefinition : PropertyName `(` UniqueFormalParameters `)` `{` FunctionBody `}`</emu-grammar>
+      <emu-grammar>MethodDefinition : ClassElementName `(` UniqueFormalParameters `)` `{` FunctionBody `}`</emu-grammar>
       <emu-alg>
         1. If |UniqueFormalParameters| Contains |SuperCall| is *true*, return *true*.
         1. Return |FunctionBody| Contains |SuperCall|.
       </emu-alg>
-      <emu-grammar>MethodDefinition : `get` PropertyName `(` `)` `{` FunctionBody `}`</emu-grammar>
+      <emu-grammar>MethodDefinition : `get` ClassElementName `(` `)` `{` FunctionBody `}`</emu-grammar>
       <emu-alg>
         1. Return |FunctionBody| Contains |SuperCall|.
       </emu-alg>
-      <emu-grammar>MethodDefinition : `set` PropertyName `(` PropertySetParameterList `)` `{` FunctionBody `}`</emu-grammar>
+      <emu-grammar>MethodDefinition : `set` ClassElementName `(` PropertySetParameterList `)` `{` FunctionBody `}`</emu-grammar>
       <emu-alg>
         1. If |PropertySetParameterList| Contains |SuperCall| is *true*, return *true*.
         1. Return |FunctionBody| Contains |SuperCall|.
@@ -19313,18 +19440,18 @@
       <emu-see-also-para op="PropName"></emu-see-also-para>
       <emu-grammar>
         MethodDefinition :
-          PropertyName `(` UniqueFormalParameters `)` `{` FunctionBody `}`
-          `get` PropertyName `(` `)` `{` FunctionBody `}`
-          `set` PropertyName `(` PropertySetParameterList `)` `{` FunctionBody `}`
+          ClassElementName `(` UniqueFormalParameters `)` `{` FunctionBody `}`
+          `get` ClassElementName `(` `)` `{` FunctionBody `}`
+          `set` ClassElementName `(` PropertySetParameterList `)` `{` FunctionBody `}`
       </emu-grammar>
       <emu-alg>
-        1. Return PropName of |PropertyName|.
+        1. Return PropName of |ClassElementName|.
       </emu-alg>
     </emu-clause>
 
     <emu-clause id="sec-static-semantics-specialmethod">
       <h1>Static Semantics: SpecialMethod</h1>
-      <emu-grammar>MethodDefinition : PropertyName `(` UniqueFormalParameters `)` `{` FunctionBody `}`</emu-grammar>
+      <emu-grammar>MethodDefinition : ClassElementName `(` UniqueFormalParameters `)` `{` FunctionBody `}`</emu-grammar>
       <emu-alg>
         1. Return *false*.
       </emu-alg>
@@ -19333,8 +19460,8 @@
           GeneratorMethod
           AsyncMethod
           AsyncGeneratorMethod
-          `get` PropertyName `(` `)` `{` FunctionBody `}`
-          `set` PropertyName `(` PropertySetParameterList `)` `{` FunctionBody `}`
+          `get` ClassElementName `(` `)` `{` FunctionBody `}`
+          `set` ClassElementName `(` PropertySetParameterList `)` `{` FunctionBody `}`
       </emu-grammar>
       <emu-alg>
         1. Return *true*.
@@ -19344,7 +19471,7 @@
     <emu-clause id="sec-runtime-semantics-definemethod">
       <h1>Runtime Semantics: DefineMethod</h1>
       <p>With parameter _object_ and optional parameter _functionPrototype_.</p>
-      <emu-grammar>MethodDefinition : PropertyName `(` UniqueFormalParameters `)` `{` FunctionBody `}`</emu-grammar>
+      <emu-grammar>MethodDefinition : ClassElementName `(` UniqueFormalParameters `)` `{` FunctionBody `}`</emu-grammar>
       <emu-alg>
         1. Let _propKey_ be the result of evaluating |PropertyName|.
         1. ReturnIfAbrupt(_propKey_).
@@ -19367,14 +19494,13 @@
       <h1>Runtime Semantics: PropertyDefinitionEvaluation</h1>
       <p>With parameters _object_ and _enumerable_.</p>
       <emu-see-also-para op="PropertyDefinitionEvaluation"></emu-see-also-para>
-      <emu-grammar>MethodDefinition : PropertyName `(` UniqueFormalParameters `)` `{` FunctionBody `}`</emu-grammar>
+      <emu-grammar>MethodDefinition : ClassElementName `(` UniqueFormalParameters `)` `{` FunctionBody `}`</emu-grammar>
       <emu-alg>
         1. Let _methodDef_ be ? DefineMethod of |MethodDefinition| with argument _object_.
         1. Perform SetFunctionName(_methodDef_.[[Closure]], _methodDef_.[[Key]]).
-        1. Let _desc_ be the PropertyDescriptor { [[Value]]: _methodDef_.[[Closure]], [[Writable]]: *true*, [[Enumerable]]: _enumerable_, [[Configurable]]: *true* }.
-        1. Return ? DefinePropertyOrThrow(_object_, _methodDef_.[[Key]], _desc_).
+        1. Perform ? DefineOrdinaryMethod(_methodDef_.[[Key]], _object_, _methodDef_.[[Closure]], _enumerable_).
       </emu-alg>
-      <emu-grammar>MethodDefinition : `get` PropertyName `(` `)` `{` FunctionBody `}`</emu-grammar>
+      <emu-grammar>MethodDefinition : `get` ClassElementName `(` `)` `{` FunctionBody `}`</emu-grammar>
       <emu-alg>
         1. Let _propKey_ be the result of evaluating |PropertyName|.
         1. ReturnIfAbrupt(_propKey_).
@@ -19385,10 +19511,21 @@
         1. Perform MakeMethod(_closure_, _object_).
         1. Perform SetFunctionName(_closure_, _propKey_, `"get"`).
         1. Set _closure_.[[SourceText]] to the source text matched by |MethodDefinition|.
-        1. Let _desc_ be the PropertyDescriptor { [[Get]]: _closure_, [[Enumerable]]: _enumerable_, [[Configurable]]: *true* }.
-        1. Return ? DefinePropertyOrThrow(_object_, _propKey_, _desc_).
+        1. If _propKey_ is a Private Name,
+          1. If _propKey_ has a [[Kind]] field,
+            1. Assert: _propKey_.[[Kind]] is `"accessor"`.
+            1. Assert: _propKey_.[[Brand]] is _object_.
+            1. Assert: _propKey_ does not have a [[Get]] field.
+            1. Set _propKey_.[[Get]] to _closure_.
+          1. Otherwise,
+            1. Set _propKey_.[[Kind]] to `"accessor"`.
+            1. Set _propKey_.[[Brand]] to _object_.
+            1. Set _propKey_.[[Get]] to _closure_.
+        1. Else,
+          1. Let _desc_ be the PropertyDescriptor { [[Get]]: _closure_, [[Enumerable]]: _enumerable_, [[Configurable]]: *true* }.
+          1. Return ? DefinePropertyOrThrow(_object_, _propKey_, _desc_).
       </emu-alg>
-      <emu-grammar>MethodDefinition : `set` PropertyName `(` PropertySetParameterList `)` `{` FunctionBody `}`</emu-grammar>
+      <emu-grammar>MethodDefinition : `set` ClassElementName `(` PropertySetParameterList `)` `{` FunctionBody `}`</emu-grammar>
       <emu-alg>
         1. Let _propKey_ be the result of evaluating |PropertyName|.
         1. ReturnIfAbrupt(_propKey_).
@@ -19398,8 +19535,19 @@
         1. Perform MakeMethod(_closure_, _object_).
         1. Perform SetFunctionName(_closure_, _propKey_, `"set"`).
         1. Set _closure_.[[SourceText]] to the source text matched by |MethodDefinition|.
-        1. Let _desc_ be the PropertyDescriptor { [[Set]]: _closure_, [[Enumerable]]: _enumerable_, [[Configurable]]: *true* }.
-        1. Return ? DefinePropertyOrThrow(_object_, _propKey_, _desc_).
+        1. If _propKey_ is a Private Name,
+          1. If _propKey_ has a [[Kind]] field,
+            1. Assert: _propKey_.[[Kind]] is `"accessor"`.
+            1. Assert: _propKey_.[[Brand]] is _object_.
+            1. Assert: _propKey_ does not have a [[Set]] field.
+            1. Set _propKey_.[[Set]] to _closure_.
+          1. Otherwise,
+            1. Set _propKey_.[[Kind]] to `"accessor"`.
+            1. Set _propKey_.[[Brand]] to _object_.
+            1. Set _propKey_.[[Set]] to _closure_.
+        1. Else,
+          1. Let _desc_ be the PropertyDescriptor { [[Set]]: _closure_, [[Enumerable]]: _enumerable_, [[Configurable]]: *true* }.
+          1. Return ? DefinePropertyOrThrow(_object_, _propKey_, _desc_).
       </emu-alg>
     </emu-clause>
   </emu-clause>
@@ -19409,7 +19557,7 @@
     <h2>Syntax</h2>
     <emu-grammar type="definition">
       GeneratorMethod[Yield, Await] :
-        `*` PropertyName[?Yield, ?Await] `(` UniqueFormalParameters[+Yield, ~Await] `)` `{` GeneratorBody `}`
+        `*` ClassElementName[?Yield, ?Await] `(` UniqueFormalParameters[+Yield, ~Await] `)` `{` GeneratorBody `}`
 
       GeneratorDeclaration[Yield, Await, Default] :
         `function` `*` BindingIdentifier[?Yield, ?Await] `(` FormalParameters[+Yield, ~Await] `)` `{` GeneratorBody `}`
@@ -19438,7 +19586,7 @@
 
     <emu-clause id="sec-generator-function-definitions-static-semantics-early-errors">
       <h1>Static Semantics: Early Errors</h1>
-      <emu-grammar>GeneratorMethod : `*` PropertyName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`</emu-grammar>
+      <emu-grammar>GeneratorMethod : `*` ClassElementName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`</emu-grammar>
       <ul>
         <li>
           It is a Syntax Error if HasDirectSuper of |GeneratorMethod| is *true*.
@@ -19511,9 +19659,9 @@
       <h1>Static Semantics: ComputedPropertyContains</h1>
       <p>With parameter _symbol_.</p>
       <emu-see-also-para op="ComputedPropertyContains"></emu-see-also-para>
-      <emu-grammar>GeneratorMethod : `*` PropertyName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`</emu-grammar>
+      <emu-grammar>GeneratorMethod : `*` ClassElementName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`</emu-grammar>
       <emu-alg>
-        1. Return the result of ComputedPropertyContains for |PropertyName| with argument _symbol_.
+        1. Return the result of ComputedPropertyContains for |ClassElementName| with argument _symbol_.
       </emu-alg>
     </emu-clause>
 
@@ -19539,7 +19687,7 @@
     <emu-clause id="sec-generator-function-definitions-static-semantics-hasdirectsuper">
       <h1>Static Semantics: HasDirectSuper</h1>
       <emu-see-also-para op="HasDirectSuper"></emu-see-also-para>
-      <emu-grammar>GeneratorMethod : `*` PropertyName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`</emu-grammar>
+      <emu-grammar>GeneratorMethod : `*` ClassElementName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`</emu-grammar>
       <emu-alg>
         1. If |UniqueFormalParameters| Contains |SuperCall| is *true*, return *true*.
         1. Return |GeneratorBody| Contains |SuperCall|.
@@ -19584,9 +19732,9 @@
     <emu-clause id="sec-generator-function-definitions-static-semantics-propname">
       <h1>Static Semantics: PropName</h1>
       <emu-see-also-para op="PropName"></emu-see-also-para>
-      <emu-grammar>GeneratorMethod : `*` PropertyName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`</emu-grammar>
+      <emu-grammar>GeneratorMethod : `*` ClassElementName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`</emu-grammar>
       <emu-alg>
-        1. Return PropName of |PropertyName|.
+        1. Return PropName of |ClassElementName|.
       </emu-alg>
     </emu-clause>
 
@@ -19635,7 +19783,7 @@
       <h1>Runtime Semantics: PropertyDefinitionEvaluation</h1>
       <p>With parameters _object_ and _enumerable_.</p>
       <emu-see-also-para op="PropertyDefinitionEvaluation"></emu-see-also-para>
-      <emu-grammar>GeneratorMethod : `*` PropertyName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`</emu-grammar>
+      <emu-grammar>GeneratorMethod : `*` ClassElementName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`</emu-grammar>
       <emu-alg>
         1. Let _propKey_ be the result of evaluating |PropertyName|.
         1. ReturnIfAbrupt(_propKey_).
@@ -19645,10 +19793,8 @@
         1. Perform MakeMethod(_closure_, _object_).
         1. Let _prototype_ be ObjectCreate(%GeneratorPrototype%).
         1. Perform DefinePropertyOrThrow(_closure_, `"prototype"`, PropertyDescriptor { [[Value]]: _prototype_, [[Writable]]: *true*, [[Enumerable]]: *false*, [[Configurable]]: *false* }).
-        1. Perform SetFunctionName(_closure_, _propKey_).
         1. Set _closure_.[[SourceText]] to the source text matched by |GeneratorMethod|.
-        1. Let _desc_ be the PropertyDescriptor { [[Value]]: _closure_, [[Writable]]: *true*, [[Enumerable]]: _enumerable_, [[Configurable]]: *true* }.
-        1. Return ? DefinePropertyOrThrow(_object_, _propKey_, _desc_).
+        1. Return DefineOrdinaryMethod(_propKey_, _object_, _closure_, _enumerable_).
       </emu-alg>
     </emu-clause>
 
@@ -19769,7 +19915,7 @@
     <h2>Syntax</h2>
     <emu-grammar type="definition">
       AsyncGeneratorMethod[Yield, Await] :
-        `async` [no LineTerminator here] `*` PropertyName[?Yield, ?Await] `(` UniqueFormalParameters[+Yield, +Await] `)` `{` AsyncGeneratorBody `}`
+        `async` [no LineTerminator here] `*` ClassElementName[?Yield, ?Await] `(` UniqueFormalParameters[+Yield, +Await] `)` `{` AsyncGeneratorBody `}`
 
       AsyncGeneratorDeclaration[Yield, Await, Default] :
         `async` [no LineTerminator here] `function` `*` BindingIdentifier[?Yield, ?Await] `(` FormalParameters[+Yield, +Await] `)` `{` AsyncGeneratorBody `}`
@@ -19790,7 +19936,7 @@
 
     <emu-clause id="sec-async-generator-function-definitions-static-semantics-early-errors">
       <h1>Static Semantics: Early Errors</h1>
-      <emu-grammar>AsyncGeneratorMethod : `async` `*` PropertyName `(` UniqueFormalParameters `)` `{` AsyncGeneratorBody `}`</emu-grammar>
+      <emu-grammar>AsyncGeneratorMethod : `async` `*` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncGeneratorBody `}`</emu-grammar>
       <ul>
         <li>It is a Syntax Error if HasDirectSuper of |AsyncGeneratorMethod| is *true*.</li>
         <li>It is a Syntax Error if |UniqueFormalParameters| Contains |YieldExpression| is *true*.</li>
@@ -19839,9 +19985,9 @@
       <h1>Static Semantics: ComputedPropertyContains</h1>
       <p>With parameter _symbol_.</p>
       <emu-see-also-para op="ComputedPropertyContains"></emu-see-also-para>
-      <emu-grammar>AsyncGeneratorMethod : `async` `*` PropertyName `(` UniqueFormalParameters `)` `{` AsyncGeneratorBody `}`</emu-grammar>
+      <emu-grammar>AsyncGeneratorMethod : `async` `*` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncGeneratorBody `}`</emu-grammar>
       <emu-alg>
-        1. Return the result of ComputedPropertyContains for |PropertyName| with argument _symbol_.
+        1. Return the result of ComputedPropertyContains for |ClassElementName| with argument _symbol_.
       </emu-alg>
     </emu-clause>
 
@@ -19867,7 +20013,7 @@
     <emu-clause id="sec-async-generator-function-definitions-static-semantics-hasdirectsuper">
       <h1>Static Semantics: HasDirectSuper</h1>
       <emu-see-also-para op="HasDirectSuper"></emu-see-also-para>
-      <emu-grammar>AsyncGeneratorMethod : `async` `*` PropertyName `(` UniqueFormalParameters `)` `{` AsyncGeneratorBody `}`</emu-grammar>
+      <emu-grammar>AsyncGeneratorMethod : `async` `*` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncGeneratorBody `}`</emu-grammar>
       <emu-alg>
         1. If |UniqueFormalParameters| Contains |SuperCall| is *true*, return *true*.
         1. Return |AsyncGeneratorBody| Contains |SuperCall|.
@@ -19912,9 +20058,9 @@
     <emu-clause id="sec-async-generator-function-definitions-static-semantics-propname">
       <h1>Static Semantics: PropName</h1>
       <emu-see-also-para op="PropName"></emu-see-also-para>
-      <emu-grammar>AsyncGeneratorMethod : `async` `*` PropertyName `(` UniqueFormalParameters `)` `{` AsyncGeneratorBody `}`</emu-grammar>
+      <emu-grammar>AsyncGeneratorMethod : `async` `*` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncGeneratorBody `}`</emu-grammar>
       <emu-alg>
-        1. Return PropName of |PropertyName|.
+        1. Return PropName of |ClassElementName|.
       </emu-alg>
     </emu-clause>
 
@@ -19968,10 +20114,10 @@
       <h1>Runtime Semantics: PropertyDefinitionEvaluation</h1>
       <p>With parameter _object_ and _enumerable_.</p>
       <emu-grammar>
-        AsyncGeneratorMethod : `async` `*` PropertyName `(` UniqueFormalParameters `)` `{` AsyncGeneratorBody `}`
+        AsyncGeneratorMethod : `async` `*` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncGeneratorBody `}`
       </emu-grammar>
       <emu-alg>
-        1. Let _propKey_ be the result of evaluating |PropertyName|.
+        1. Let _propKey_ be the result of evaluating |ClassElementName|.
         1. ReturnIfAbrupt(_propKey_).
         1. Let _scope_ be the running execution context's LexicalEnvironment.
         1. Let _privateScope_ be the PrivateEnvironment of the running execution context.
@@ -19979,10 +20125,8 @@
         1. Perform ! MakeMethod(_closure_, _object_).
         1. Let _prototype_ be ! ObjectCreate(%AsyncGeneratorPrototype%).
         1. Perform ! DefinePropertyOrThrow(_closure_, `"prototype"`, PropertyDescriptor { [[Value]]: _prototype_, [[Writable]]: *true*, [[Enumerable]]: *false*, [[Configurable]]: *false* }).
-        1. Perform ! SetFunctionName(_closure_, _propKey_).
         1. Set _closure_.[[SourceText]] to the source text matched by |AsyncGeneratorMethod|.
-        1. Let _desc_ be PropertyDescriptor { [[Value]]: _closure_, [[Writable]]: *true*, [[Enumerable]]: _enumerable_, [[Configurable]]: *true* }.
-        1. Return ? DefinePropertyOrThrow(_object_, _propKey_, _desc_).
+        1. Perform ? DefineOrdinaryMethod(_propKey_, _object_, _closure_, _enumerable_).
       </emu-alg>
     </emu-clause>
 
@@ -20099,7 +20243,7 @@
           It is a Syntax Error if PrototypePropertyNameList of |ClassElementList| contains more than one occurrence of `"constructor"`.
         </li>
         <li>
-          It is a Syntax Error if PrivateBoundIdentifiers of |ClassElementList| contains any duplicate entries.
+          It is a Syntax Error if PrivateBoundIdentifiers of |ClassElementList| contains any duplicate entries, unless the name is used once for a getter and once for a setter and in no other entries.
         </li>
       </ul>
       <emu-grammar>ClassElement : MethodDefinition</emu-grammar>
@@ -20118,6 +20262,9 @@
         </li>
         <li>
           It is a Syntax Error if PropName of |MethodDefinition| is `"prototype"`.
+        </li>
+        <li>
+          It is a Syntax Error if PrivateBoundIdentifiers of |MethodDefinition| is non-empty.
         </li>
       </ul>
 
@@ -20363,6 +20510,21 @@
       For all other grammatical productions, recurse on subexpressions/substatements, passing in the _names_ of the caller. If all pieces return *true*, then return *true*. If any returns *false*, return *false*.
     </emu-clause>
 
+    <emu-clause id="sec-define-ordinary-method" aoid="DefineOrdinaryMethod">
+      <h1>DefineOrdinaryMethod ( _key_, _homeObject_, _closure_, _enumerable_ )</h1>
+      <emu-alg>
+        1. Perform SetFunctionName(_closure_, _key_).
+        1. If _key_ is a Private Name,
+          1. Assert: _key_ does not have a [[Kind]] field.
+          1. Set _key_.[[Kind]] to `"method"`.
+          1. Set _key_.[[Value]] to _closure_.
+          1. Set _key_.[[Brand]] to _homeObject_.
+        1. Else,
+          1. Let _desc_ be the PropertyDescriptor{[[Value]]: _closure_, [[Writable]]: *true*, [[Enumerable]]: _enumerable_, [[Configurable]]: *true*}.
+          1. Perform ? DefinePropertyOrThrow(_homeObject_, _key_, _desc_).
+      </emu-alg>
+    </emu-clause>
+
     <emu-clause id="sec-class-definitions-static-semantics-classelementevaluation">
       <h1>Runtime Semantics: ClassElementEvaluation</h1>
       <p>With parameters _object_ and _enumerable_.</p>
@@ -20371,13 +20533,13 @@
       <emu-alg>
         1. Return ClassFieldDefinitionEvaluation of |FieldDefinition| with parameter _object_.
       </emu-alg>
+
       <emu-grammar>
         ClassElement : MethodDefinition
         ClassElement : `static` MethodDefinition
       </emu-grammar>
       <emu-alg>
-        1. Perform ? PropertyDefinitionEvaluation with parameters _object_ and _enumerable_.
-        1. Return ~empty~.
+        1. Return PropertyDefinitionEvaluation of |MethodDefinition| with arguments _object_ and _enumerable_.
       </emu-alg>
     </emu-clause>
 
@@ -20399,15 +20561,6 @@
 
       <emu-grammar>
         ClassElementName : PropertyName
-      </emu-grammar>
-      <emu-alg>
-        1. Return a new empty List.
-      </emu-alg>
-
-      <emu-grammar>
-        ClassElement : MethodDefinition `;`
-
-        ClassElement : `static` MethodDefinition `;`
 
         ClassElement : `;`
       </emu-grammar>
@@ -20422,6 +20575,25 @@
         1. Let _names_ be PrivateBoundIdentifiers of |ClassElementList|.
         1. Append to _names_ the elements of PrivateBoundIdentifiers of |ClassElement|.
         1. Return _names_.
+      </emu-alg>
+
+      <emu-grammar>
+        MethodDefinition :
+          ClassElementName `(` UniqueFormalParameters `)` `{` FunctionBody `}`
+          `get` ClassElementName `(` `)` `{` FunctionBody `}`
+          `set` ClassElementName `(` PropertySetParameterList `)` `{` FunctionBody `}`
+
+        GeneratorMethod :
+          `*` ClassElementName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`
+
+        AsyncMethod :
+          `async` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
+
+        AsyncGeneratorMethod :
+          `async` `*` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
+      </emu-grammar>
+      <emu-alg>
+        1. Return PrivateBoundIdentifiers of |ClassElementName|.
       </emu-alg>
     </emu-clause>
 
@@ -20448,19 +20620,19 @@
 
       <emu-grammar>
         MethodDefinition :
-          PropertyName `(` UniqueFormalParameters `)` `{` FunctionBody `}`
-          `get` PropertyName `(` `)` `{` FunctionBody `}`
-          `set` PropertyName `(` PropertySetParameterList `)` `{` FunctionBody `}`
+          ClassElementName `(` UniqueFormalParameters `)` `{` FunctionBody `}`
+          `get` ClassElementName `(` `)` `{` FunctionBody `}`
+          `set` ClassElementName `(` PropertySetParameterList `)` `{` FunctionBody `}`
       </emu-grammar>
       <emu-alg>
-        1. Return the result of ContainsArguments for |PropertyName|.
+        1. Return the result of ContainsArguments for |ClassElementName|.
       </emu-alg>
 
       <emu-grammar>
-        GeneratorMethod : `*` PropertyName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`
+        GeneratorMethod : `*` ClassElementName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`
       </emu-grammar>
       <emu-alg>
-        1. Return the result of ContainsArguments for |PropertyName|.
+        1. Return the result of ContainsArguments for |ClassElementName|.
       </emu-alg>
 
       <emu-grammar>
@@ -20480,7 +20652,7 @@
       </emu-alg>
 
       <emu-grammar>
-        AsyncMethod : `async` [no LineTerminator here] PropertyName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
+        AsyncMethod : `async` [no LineTerminator here] ClassElementName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
       </emu-grammar>
       <emu-alg>
         1. Return the result of ContainsArguments for |PropertyName|.
@@ -20575,6 +20747,8 @@
         1. If _classBinding_ is not *undefined*, then
           1. Perform _classScopeEnvRec_.InitializeBinding(_classBinding_, _F_).
         1. Set _F_.[[Fields]] to _instanceFields_.
+        1. If PrivateBoundIdentifiers of |ClassBody| contains a Private Name _P_ such that _P_'s [[Kind]] field is either `"method"` or `"accessor"`,
+          1. Set _F_.[[PrivateBrand]] to _proto_.
         1. Set the running execution context's PrivateEnvironment to _outerPrivateEnvironment_.
         1. Return _F_.
       </emu-alg>
@@ -20645,10 +20819,16 @@
       </emu-grammar>
       <emu-alg>
         1. Let _privateIdentifier_ be StringValue of |PrivateIdentifier|.
-        1. Let _privateName_ be NewPrivateName(_privateIdentifier_).
         1. Let _scope_ be the running execution context's PrivateEnvironment.
         1. Let _scopeEnvRec_ be _scope_'s EnvironmentRecord.
-        1. Perform ! _scopeEnvRec_.InitializeBinding(_privateIdentifier_, _privateName_).
+        1. Assert: _scopeEnvRec_ has a binding for _privateIdentifier_.
+        1. If _scopeEnvRec_'s binding for _privateIdentifier_ is uninitialized,
+          1. Let _privateName_ be NewPrivateName(_privateIdentifier_).
+          1. Perform ! _scopeEnvRec_.InitializeBinding(_privateIdentifier_, _privateName_).
+        1. Otherwise,
+          1. Let _privateName_ be _scopeEnvRec_.GetBindingValue(_privateIdentifier_).
+          1. NOTE: The only case where this may occur is in getter/setter pairs; other duplicates are prohibited as a Syntax Error.
+        1. Assert: _privateName_.[[Description]] is _privateIdentifier_.
         1. Return _privateName_.
       </emu-alg>
     </emu-clause>
@@ -20697,7 +20877,7 @@
         `async` [no LineTerminator here] `function` BindingIdentifier[~Yield, +Await] `(` FormalParameters[~Yield, +Await] `)` `{` AsyncFunctionBody `}`
 
       AsyncMethod[Yield, Await] :
-        `async` [no LineTerminator here] PropertyName[?Yield, ?Await] `(` UniqueFormalParameters[~Yield, +Await] `)` `{` AsyncFunctionBody `}`
+        `async` [no LineTerminator here] ClassElementName[?Yield, ?Await] `(` UniqueFormalParameters[~Yield, +Await] `)` `{` AsyncFunctionBody `}`
 
       AsyncFunctionBody :
         FunctionBody[~Yield, +Await]
@@ -20726,7 +20906,7 @@
     <emu-clause id="sec-async-function-definitions-static-semantics-early-errors">
       <h1>Static Semantics: Early Errors</h1>
       <emu-grammar>
-        AsyncMethod : `async` PropertyName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
+        AsyncMethod : `async` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
       </emu-grammar>
       <ul>
         <li>It is a Syntax Error if ContainsUseStrict of |AsyncFunctionBody| is *true* and IsSimpleParameterList of |UniqueFormalParameters| is *false*.</li>
@@ -20777,10 +20957,10 @@
       <h1>Static Semantics: ComputedPropertyContains</h1>
       <p>With parameter _symbol_.</p>
       <emu-grammar>
-        AsyncMethod : `async` PropertyName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
+        AsyncMethod : `async` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
       </emu-grammar>
       <emu-alg>
-        1. Return the result of ComputedPropertyContains for |PropertyName| with argument _symbol_.
+        1. Return the result of ComputedPropertyContains for |ClassElementName| with argument _symbol_.
       </emu-alg>
     </emu-clause>
 
@@ -20804,7 +20984,7 @@
     <emu-clause id="sec-async-function-definitions-static-semantics-HasDirectSuper">
       <h1>Static Semantics: HasDirectSuper</h1>
       <emu-grammar>
-        AsyncMethod : `async` PropertyName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
+        AsyncMethod : `async` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
       </emu-grammar>
       <emu-alg>
         1. If |UniqueFormalParameters| Contains |SuperCall| is *true*, return *true*.
@@ -20855,10 +21035,10 @@
     <emu-clause id="sec-async-function-definitions-static-semantics-PropName">
       <h1>Static Semantics: PropName</h1>
       <emu-grammar>
-        AsyncMethod : `async` PropertyName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
+        AsyncMethod : `async` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
       </emu-grammar>
       <emu-alg>
-        1. Return PropName of |PropertyName|.
+        1. Return PropName of |ClassElementName|.
       </emu-alg>
     </emu-clause>
 
@@ -20919,19 +21099,17 @@
       <h1>Runtime Semantics: PropertyDefinitionEvaluation</h1>
       <p>With parameters _object_ and _enumerable_.</p>
       <emu-grammar>
-        AsyncMethod : `async` PropertyName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
+        AsyncMethod : `async` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
       </emu-grammar>
       <emu-alg>
-        1. Let _propKey_ be the result of evaluating |PropertyName|.
+        1. Let _propKey_ be the result of evaluating |ClassElementName|.
         1. ReturnIfAbrupt(_propKey_).
         1. Let _scope_ be the LexicalEnvironment of the running execution context.
         1. Let _privateScope_ be the PrivateEnvironment of the running execution context.
         1. Let _closure_ be ! AsyncFunctionCreate(~Method~, |UniqueFormalParameters|, |AsyncFunctionBody|, _scope_, _privateScope_).
         1. Perform ! MakeMethod(_closure_, _object_).
-        1. Perform ! SetFunctionName(_closure_, _propKey_).
         1. Set _closure_.[[SourceText]] to the source text matched by |AsyncMethod|.
-        1. Let _desc_ be the PropertyDescriptor { [[Value]]: _closure_, [[Writable]]: *true*, [[Enumerable]]: _enumerable_, [[Configurable]]: *true* }.
-        1. Return ? DefinePropertyOrThrow(_object_, _propKey_, _desc_).
+        1. Perform ? DefineOrdinaryMethod(_propKey_, _object_, _closure_, _enumerable_).
       </emu-alg>
     </emu-clause>
 
