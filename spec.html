@@ -5173,8 +5173,8 @@
       </emu-alg>
     </emu-clause>
 
-    <emu-clause id="sec-initializepublicinstancefields" aoid="InitializeInstanceFields">
-      <h1>InitializeInstanceFields ( _O_, _constructor_ )</h1>
+    <emu-clause id="sec-initializepublicinstanceelements" aoid="InitializeInstanceElements">
+      <h1>InitializeInstanceElements ( _O_, _constructor_ )</h1>
       <emu-alg>
         1. Assert: Type(_O_) is Object.
         1. Assert: _constructor_ is an ECMAScript function object.
@@ -7762,7 +7762,7 @@
         1. Assert: _calleeContext_ is now the running execution context.
         1. If _kind_ is `"base"`, then
           1. Perform OrdinaryCallBindThis(_F_, _calleeContext_, _thisArgument_).
-          1. Let _result_ be InitializeInstanceFields(_thisArgument_, _F_).
+          1. Let _result_ be InitializeInstanceElements(_thisArgument_, _F_).
           1. If _result_ is an abrupt completion, then
             1. Remove _calleeContext_ from execution context stack and restore _callerContext_ as the running execution context.
             1. Return Completion(_result_).
@@ -13053,7 +13053,7 @@
           1. Let _result_ be ? Construct(_func_, _argList_, _newTarget_).
           1. Let _thisER_ be GetThisEnvironment().
           1. Perform ? _thisER_.BindThisValue(_result_).
-          1. Perform ? InitializeInstanceFields(_result_, _F_).
+          1. Perform ? InitializeInstanceElements(_result_, _F_).
           1. Return _result_.
         </emu-alg>
       </emu-clause>
