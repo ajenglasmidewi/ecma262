@@ -20136,7 +20136,7 @@
         <li>It is a Syntax Error if |Initializer| is present and |Initializer| Contains |SuperCall| is *true*.</li>
       </ul>
 
-      <emu-grammar>ClassElementName : PrivateIdentifier `;`</emu-grammar>
+      <emu-grammar>ClassElementName : PrivateIdentifier</emu-grammar>
       <ul>
         <li>It is a Syntax Error if StringValue of |PrivateIdentifier| is `"#constructor"`.</li>
       </ul>
@@ -20333,14 +20333,7 @@
       </emu-alg>
 
       <emu-grammar>
-        ClassElementName[Yield, Await] : PropertyName[?Yield, ?Await]
-      </emu-grammar>
-      <emu-alg>
-        1. Return PropName of |PropertyName|.
-      </emu-alg>
-
-      <emu-grammar>
-        ClassElementName[Yield, Await] : PrivateIdentifier
+        ClassElementName : PrivateIdentifier
       </emu-grammar>
       <emu-alg>
         1. Return ~empty~.
@@ -20424,26 +20417,12 @@
       </emu-alg>
 
       <emu-grammar>
-        ClassElementList : ClassElement
-      </emu-grammar>
-      <emu-alg>
-        1. Return PrivateBoundIdentifiers of |ClassElement|.
-      </emu-alg>
-
-      <emu-grammar>
         ClassElementList : ClassElementList ClassElement
       </emu-grammar>
       <emu-alg>
         1. Let _names_ be PrivateBoundIdentifiers of |ClassElementList|.
         1. Append to _names_ the elements of PrivateBoundIdentifiers of |ClassElement|.
         1. Return _names_.
-      </emu-alg>
-
-      <emu-grammar>
-        ClassBody : ClassElementList
-      </emu-grammar>
-      <emu-alg>
-        1. Return PrivateBoundIdentifiers of |ClassElementList|.
       </emu-alg>
     </emu-clause>
 
