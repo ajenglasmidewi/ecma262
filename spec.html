@@ -20211,6 +20211,7 @@
         MethodDefinition[?Yield, ?Await]
         `static` MethodDefinition[?Yield, ?Await]
         FieldDefinition[?Yield, ?Await] `;`
+        `static` FieldDefinition[?Yield, ?Await] `;`
         `;`
 
       FieldDefinition[Yield, Await] :
@@ -20263,14 +20264,18 @@
         <li>
           It is a Syntax Error if PropName of |MethodDefinition| is `"prototype"`.
         </li>
-        <li>
-          It is a Syntax Error if PrivateBoundIdentifiers of |MethodDefinition| is non-empty.
-        </li>
       </ul>
 
       <emu-grammar>ClassElement : FieldDefinition `;`</emu-grammar>
       <ul>
         <li>It is a Syntax Error if PropName of |FieldDefinition| is `"constructor"`.</li>
+      </ul>
+
+      <emu-grammar>ClassElement : `static` FieldDefinition `;`</emu-grammar>
+      <ul>
+        <li>
+          It is a Syntax Error if PropName of |FieldDefinition| is `"prototype"` or `"constructor"`.
+        </li>
       </ul>
 
       <emu-grammar>
@@ -20529,7 +20534,10 @@
       <h1>Runtime Semantics: ClassElementEvaluation</h1>
       <p>With parameters _object_ and _enumerable_.</p>
 
-      <emu-grammar>ClassElement : FieldDefinition `;`</emu-grammar>
+      <emu-grammar>
+        ClassElement : FieldDefinition `;`
+        ClassElement : `static` FieldDefinition `;`
+      </emu-grammar>
       <emu-alg>
         1. Return ClassFieldDefinitionEvaluation of |FieldDefinition| with parameter _object_.
       </emu-alg>
@@ -20733,6 +20741,7 @@
         1. If |ClassBody_opt| is not present, let _elements_ be a new empty List.
         1. Else, let _elements_ be NonConstructorMethodDefinitions of |ClassBody|.
         1. Let _instanceFields_ be a new empty List.
+        1. Let _staticFields_ be a new empty List.
         1. For each |ClassElement| _e_ in order from _elements_, do
           1. If IsStatic of _e_ is *false*, then
             1. Let _field_ be ClassElementEvaluation of _e_ with arguments _proto_ and *false*.
@@ -20742,13 +20751,19 @@
             1. Set the running execution context's LexicalEnvironment to _lex_.
             1. Set the running execution context's PrivateEnvironment to _outerPrivateEnvironment_.
             1. Return Completion(_field_).
-          1. If _field_ is not ~empty~, append _field_ to _instanceFields_.
+          1. If _field_ is not ~empty~,
+            1. If IsStatic of _e_ is *false*, append _field_ to _instanceFields_.
+            1. Else, append _field_ to _staticFields_.
         1. Set the running execution context's LexicalEnvironment to _lex_.
         1. If _classBinding_ is not *undefined*, then
           1. Perform _classScopeEnvRec_.InitializeBinding(_classBinding_, _F_).
         1. Set _F_.[[Fields]] to _instanceFields_.
-        1. If PrivateBoundIdentifiers of |ClassBody| contains a Private Name _P_ such that _P_'s [[Kind]] field is either `"method"` or `"accessor"`,
+        1. If PrivateBoundIdentifiers of |ClassBody| contains a Private Name _P_ such that _P_'s [[Kind]] field is either `"method"` or `"accessor"` and _P_'s [[Brand]] field is _proto_,
           1. Set _F_.[[PrivateBrand]] to _proto_.
+        1. If PrivateBoundIdentifiers of |ClassBody| contains a Private Name _P_ such that _P_'s [[Kind]] field is either `"method"` or `"accessor"` and _P_'s [[Brand]] is _F_,
+          1. PrivateBrandAdd(_F_, _F_).
+        1. For each item _fieldRecord_ in order from _staticFields_,
+          1. Perform ? DefineField(_F_, _field_).
         1. Set the running execution context's PrivateEnvironment to _outerPrivateEnvironment_.
         1. Return _F_.
       </emu-alg>
