@@ -5181,7 +5181,6 @@
         1. Let _fields_ be the value of _constructor_.[[Fields]].
         1. For each item _fieldRecord_ in order from _fields_,
           1. Perform ? DefineField(_O_, _fieldRecord_).
-        1. Return.
       </emu-alg>
     </emu-clause>
   </emu-clause>
@@ -7936,7 +7935,7 @@
           1. If _description_ is *undefined*, set _name_ to the empty String.
           1. Else, set _name_ to the string-concatenation of `"["`, _description_, and `"]"`.
         1. Else if _name_ is a Private Name,
-          1. Set _name_ to _name_'s [[Description]] value.
+          1. Set _name_ to _name_.[[Description]].
         1. If _prefix_ is present, then
           1. Set _name_ to the string-concatenation of _prefix_, the code unit 0x0020 (SPACE), and _name_.
         1. Return ! DefinePropertyOrThrow(_F_, `"name"`, PropertyDescriptor { [[Value]]: _name_, [[Writable]]: *false*, [[Enumerable]]: *false*, [[Configurable]]: *true* }).
