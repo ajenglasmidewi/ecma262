@@ -20509,19 +20509,19 @@
     <emu-clause id="sec-class-definitions-static-semantics-allprivateidentifiersvalid">
       <h1>Static Semantics: AllPrivateIdentifiersValid</h1>
       <p>With parameter _names_.</p>
-      <emu-grammar>MemberExpression[Yield, Await] : MemberExpression[?Yield, ?Await] `.` PrivateIdentifier</emu-grammar>
+      <emu-grammar>MemberExpression : MemberExpression `.` PrivateIdentifier</emu-grammar>
       <emu-alg>
         1. If StringValue of |PrivateIdentifier| is in _names_, return *true*.
         1. Return *false*.
       </emu-alg>
 
-      <emu-grammar>CallExpression[Yield, Await] : CallExpression[?Yield, ?Await] `.` PrivateIdentifier</emu-grammar>
+      <emu-grammar>CallExpression : CallExpression `.` PrivateIdentifier</emu-grammar>
       <emu-alg>
         1. If StringValue of |PrivateIdentifier| is in _names_, return *true*.
         1. Return *false*.
       </emu-alg>
 
-      <emu-grammar>ClassBody[Yield, Await] : ClassElementList[?Yield, ?Await]</emu-grammar>
+      <emu-grammar>ClassBody : ClassElementList</emu-grammar>
       <emu-alg>
         1. Let _newNames_ be a copy of _names_.
         1. Append to _newNames_ the elements of PrivateBoundIdentifiers of |ClassBody|.
@@ -20640,20 +20640,20 @@
       </emu-alg>
 
       <emu-grammar>
-        AsyncMethod : `async` [no LineTerminator here] ClassElementName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
+        AsyncMethod : `async` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
       </emu-grammar>
       <emu-alg>
         1. Return the result of ContainsArguments of |PropertyName|.
       </emu-alg>
 
       <emu-grammar>
-        AsyncFunctionDeclaration : `async` [no LineTerminator here] `function` BindingIdentifier `(` FormalParameters `)` `{` AsyncFunctionBody `}`
+        AsyncFunctionDeclaration : `async` `function` BindingIdentifier `(` FormalParameters `)` `{` AsyncFunctionBody `}`
 
-        AsyncFunctionDeclaration : `async` [no LineTerminator here] `function` `(` FormalParameters `)` `{` AsyncFunctionBody `}`
+        AsyncFunctionDeclaration : `async` `function` `(` FormalParameters `)` `{` AsyncFunctionBody `}`
 
-        AsyncFunctionExpression : `async` [no LineTerminator here] `function` `(` FormalParameters `)` `{` AsyncFunctionBody `}`
+        AsyncFunctionExpression : `async` `function` `(` FormalParameters `)` `{` AsyncFunctionBody `}`
 
-        AsyncFunctionExpression : `async` [no LineTerminator here] `function` BindingIdentifier `(` FormalParameters `)` `{` AsyncFunctionBody `}`
+        AsyncFunctionExpression : `async` `function` BindingIdentifier `(` FormalParameters `)` `{` AsyncFunctionBody `}`
       </emu-grammar>
       <emu-alg>
         1. Return *false*.
@@ -20852,14 +20852,14 @@
       </emu-alg>
 
       <emu-grammar>
-        ClassElementName[Yield, Await] : PropertyName[?Yield, ?Await]
+        ClassElementName : PropertyName
       </emu-grammar>
       <emu-alg>
         1. Return the result of evaluating |PropertyName|.
       </emu-alg>
 
       <emu-grammar>
-        ClassElementName[Yield, Await] : PrivateIdentifier
+        ClassElementName : PrivateIdentifier
       </emu-grammar>
       <emu-alg>
         1. Let _privateIdentifier_ be StringValue of |PrivateIdentifier|.
