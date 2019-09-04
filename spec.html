@@ -20530,27 +20530,6 @@
       For all other grammatical productions, recurse on subexpressions/substatements, passing in the _names_ of the caller. If all pieces return *true*, then return *true*. If any returns *false*, return *false*.
     </emu-clause>
 
-    <emu-clause id="sec-class-definitions-static-semantics-classelementevaluation">
-      <h1>Runtime Semantics: ClassElementEvaluation</h1>
-      <p>With parameters _object_ and _enumerable_.</p>
-
-      <emu-grammar>
-        ClassElement : FieldDefinition `;`
-        ClassElement : `static` FieldDefinition `;`
-      </emu-grammar>
-      <emu-alg>
-        1. Return ClassFieldDefinitionEvaluation of |FieldDefinition| with parameter _object_.
-      </emu-alg>
-
-      <emu-grammar>
-        ClassElement : MethodDefinition
-        ClassElement : `static` MethodDefinition
-      </emu-grammar>
-      <emu-alg>
-        1. Return PropertyDefinitionEvaluation of |MethodDefinition| with arguments _object_ and _enumerable_.
-      </emu-alg>
-    </emu-clause>
-
     <emu-clause id="sec-class-definitions-static-semantics-privateboundidentifiers">
       <h1>Static Semantics: PrivateBoundIdentifiers</h1>
       <emu-grammar>
@@ -20681,6 +20660,27 @@
 
       For all other grammatical productions, recurse on all nonterminals. If any piece returns *true*, then return *true*. Otherwise return *false*.
       <emu-note type=editor>TODO: Elaborate the preceding paragraph with spec text inserted in each relevant place</emu-note>
+    </emu-clause>
+
+    <emu-clause id="sec-class-definitions-static-semantics-classelementevaluation">
+      <h1>Runtime Semantics: ClassElementEvaluation</h1>
+      <p>With parameters _object_ and _enumerable_.</p>
+
+      <emu-grammar>
+        ClassElement : FieldDefinition `;`
+        ClassElement : `static` FieldDefinition `;`
+      </emu-grammar>
+      <emu-alg>
+        1. Return ClassFieldDefinitionEvaluation of |FieldDefinition| with parameter _object_.
+      </emu-alg>
+
+      <emu-grammar>
+        ClassElement : MethodDefinition
+        ClassElement : `static` MethodDefinition
+      </emu-grammar>
+      <emu-alg>
+        1. Return PropertyDefinitionEvaluation of |MethodDefinition| with arguments _object_ and _enumerable_.
+      </emu-alg>
     </emu-clause>
 
     <emu-clause id="sec-runtime-semantics-classdefinitionevaluation">
