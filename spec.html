@@ -20524,7 +20524,7 @@
       <emu-grammar>ClassBody[Yield, Await] : ClassElementList[?Yield, ?Await]</emu-grammar>
       <emu-alg>
         1. Let _newNames_ be the concatenation of _names_ with PrivateBoundIdentifiers of |ClassBody|.
-        1. Return AllPrivateIdentifiersValid of |ClassElementList| with the argument _newNames_.
+        1. Return AllPrivateIdentifiersValid of |ClassElementList| with argument _newNames_.
       </emu-alg>
 
       For all other grammatical productions, recurse on subexpressions/substatements, passing in the _names_ of the caller. If all pieces return *true*, then return *true*. If any returns *false*, return *false*.
@@ -24510,7 +24510,7 @@
             1. For each binding named _N_ in _privateEnv_, do
               1. If _privateIdentifiers_ does not contain _N_, append _N_ to _privateIdentifiers_.
             1. Let _privateEnv_ be _privateEnv_'s outer environment reference.
-          1. If AllPrivateIdentifiersValid of _body_ with the argument _privateIdentifiers_ is *false*, throw a *SyntaxError* exception.
+          1. If AllPrivateIdentifiersValid of _body_ with argument _privateIdentifiers_ is *false*, throw a *SyntaxError* exception.
           1. Let _functionsToInitialize_ be a new empty List.
           1. Let _declaredFunctionNames_ be a new empty List.
           1. For each _d_ in _varDeclarations_, in reverse list order, do
@@ -25743,8 +25743,8 @@
                 1. If _parameters_ Contains |AwaitExpression| is *true*, throw a *SyntaxError* exception.
               1. If _strict_ is *true*, then
                 1. If BoundNames of _parameters_ contains any duplicate elements, throw a *SyntaxError* exception.
-              1. If AllPrivateIdentifiersValid of _body_ with the argument « » is *false*, throw a *SyntaxError* exception.
-              1. If AllPrivateIdentifiersValid of _parameters_ with the argument « » is *false*, throw a *SyntaxError* exception.
+              1. If AllPrivateIdentifiersValid of _body_ with argument « » is *false*, throw a *SyntaxError* exception.
+              1. If AllPrivateIdentifiersValid of _parameters_ with argument « » is *false*, throw a *SyntaxError* exception.
             1. Let _proto_ be ? GetPrototypeFromConstructor(_newTarget_, _fallbackProto_).
             1. Let _F_ be FunctionAllocate(_proto_, _kind_).
             1. Let _realmF_ be _F_.[[Realm]].
