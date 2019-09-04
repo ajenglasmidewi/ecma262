@@ -8047,6 +8047,21 @@
       </emu-alg>
     </emu-clause>
 
+    <emu-clause id="sec-define-ordinary-method" aoid="DefineOrdinaryMethod">
+      <h1>DefineOrdinaryMethod ( _key_, _homeObject_, _closure_, _enumerable_ )</h1>
+      <emu-alg>
+        1. Perform SetFunctionName(_closure_, _key_).
+        1. If _key_ is a Private Name,
+          1. Assert: _key_ does not have a [[Kind]] field.
+          1. Set _key_.[[Kind]] to `"method"`.
+          1. Set _key_.[[Value]] to _closure_.
+          1. Set _key_.[[Brand]] to _homeObject_.
+        1. Else,
+          1. Let _desc_ be the PropertyDescriptor{[[Value]]: _closure_, [[Writable]]: *true*, [[Enumerable]]: _enumerable_, [[Configurable]]: *true*}.
+          1. Perform ? DefinePropertyOrThrow(_homeObject_, _key_, _desc_).
+      </emu-alg>
+    </emu-clause>
+
     <emu-clause id="sec-setfunctionname" aoid="SetFunctionName">
       <h1>SetFunctionName ( _F_, _name_ [ , _prefix_ ] )</h1>
       <p>The abstract operation SetFunctionName requires a Function argument _F_, a String or Symbol argument _name_ and optionally a String argument _prefix_. This operation adds a `name` property to _F_ by performing the following steps:</p>
@@ -20513,21 +20528,6 @@
       </emu-alg>
 
       For all other grammatical productions, recurse on subexpressions/substatements, passing in the _names_ of the caller. If all pieces return *true*, then return *true*. If any returns *false*, return *false*.
-    </emu-clause>
-
-    <emu-clause id="sec-define-ordinary-method" aoid="DefineOrdinaryMethod">
-      <h1>DefineOrdinaryMethod ( _key_, _homeObject_, _closure_, _enumerable_ )</h1>
-      <emu-alg>
-        1. Perform SetFunctionName(_closure_, _key_).
-        1. If _key_ is a Private Name,
-          1. Assert: _key_ does not have a [[Kind]] field.
-          1. Set _key_.[[Kind]] to `"method"`.
-          1. Set _key_.[[Value]] to _closure_.
-          1. Set _key_.[[Brand]] to _homeObject_.
-        1. Else,
-          1. Let _desc_ be the PropertyDescriptor{[[Value]]: _closure_, [[Writable]]: *true*, [[Enumerable]]: _enumerable_, [[Configurable]]: *true*}.
-          1. Perform ? DefinePropertyOrThrow(_homeObject_, _key_, _desc_).
-      </emu-alg>
     </emu-clause>
 
     <emu-clause id="sec-class-definitions-static-semantics-classelementevaluation">
