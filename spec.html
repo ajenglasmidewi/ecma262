@@ -10311,16 +10311,13 @@
     <h1>Tokens</h1>
     <h2>Syntax</h2>
     <emu-grammar type="definition">
-      PrivateIdentifier ::
-        `#` IdentifierName
-
       CommonToken ::
         IdentifierName
+        PrivateIdentifier
         Punctuator
         NumericLiteral
         StringLiteral
         Template
-        PrivateIdentifier
     </emu-grammar>
     <emu-note>
       <p>The |DivPunctuator|, |RegularExpressionLiteral|, |RightBracePunctuator|, and |TemplateSubstitutionTail| productions derive additional tokens that are not included in the |CommonToken| production.</p>
@@ -10337,6 +10334,9 @@
     <p>Two |IdentifierName|s that are canonically equivalent according to the Unicode standard are <em>not</em> equal unless, after replacement of each |UnicodeEscapeSequence|, they are represented by the exact same sequence of code points.</p>
     <h2>Syntax</h2>
     <emu-grammar type="definition">
+      PrivateIdentifier ::
+        `#` IdentifierName
+
       IdentifierName ::
         IdentifierStart
         IdentifierName IdentifierPart
