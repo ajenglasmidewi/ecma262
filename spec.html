@@ -5199,7 +5199,7 @@
       <emu-alg>
         1. Assert: _P_ is a Private Name.
         1. Assert: _O_ is an object with a [[PrivateFieldValues]] internal slot.
-        1. For each element _entry_ in _O_.[[PrivateFieldValues]],
+        1. For each element _entry_ in _O_.[[PrivateFieldValues]], do
           1. If _entry_.[[PrivateName]] is _P_, return _entry_.
         1. Return ~empty~.
       </emu-alg>
@@ -5286,7 +5286,7 @@
         1. If _constructor_.[[PrivateBrand]] is not *undefined*, then
           1. Perform ? PrivateBrandAdd(_O_, _constructor_.[[PrivateBrand]]).
         1. Let _fields_ be the value of _constructor_.[[Fields]].
-        1. For each item _fieldRecord_ in order from _fields_,
+        1. For each item _fieldRecord_ in order from _fields_, do
           1. Perform ? DefineField(_O_, _fieldRecord_).
       </emu-alg>
     </emu-clause>
@@ -20725,7 +20725,7 @@
         1. Let _classPrivateEnvironment_ be NewDeclarativeEnvironment(_outerPrivateEnvironment_).
         1. Let _classPrivateEnvRec_ be _classPrivateEnvironment_'s EnvironmentRecord.
         1. If |ClassBody_opt| is present, then
-          1. For each element _dn_ of the PrivateBoundIdentifiers of |ClassBody_opt|,
+          1. For each element _dn_ of the PrivateBoundIdentifiers of |ClassBody_opt|, do
             1. Perform _classPrivateEnvRec_.CreateImmutableBinding(_dn_, *true*).
         1. If |ClassHeritage_opt| is not present, then
           1. Let _protoParent_ be %Object.prototype%.
@@ -20790,7 +20790,7 @@
           1. Set _F_.[[PrivateBrand]] to _proto_.
         1. If PrivateBoundIdentifiers of |ClassBody| contains a Private Name _P_ such that _P_'s [[Kind]] field is either `"method"` or `"accessor"` and _P_'s [[Brand]] is _F_, then
           1. PrivateBrandAdd(_F_, _F_).
-        1. For each item _fieldRecord_ in order from _staticFields_,
+        1. For each item _fieldRecord_ in order from _staticFields_, do
           1. Perform ? DefineField(_F_, _field_).
         1. Set the running execution context's PrivateEnvironment to _outerPrivateEnvironment_.
         1. Return _F_.
@@ -24507,7 +24507,7 @@
           1. Let _privateIdentifiers_ be an empty List.
           1. Let _privateEnv_ be _privateEnv_.
           1. Repeat while _privateEnv_ is not *null*,
-            1. For each binding named _N_ in _privateEnv_,
+            1. For each binding named _N_ in _privateEnv_, do
               1. If _privateIdentifiers_ does not contain _N_, append _N_ to _privateIdentifiers_.
             1. Let _privateEnv_ be _privateEnv_'s outer environment reference.
           1. If AllPrivateIdentifiersValid of _body_ with the argument _privateIdentifiers_ is *false*, throw a *SyntaxError* exception.
