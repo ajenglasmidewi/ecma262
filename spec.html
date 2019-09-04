@@ -19532,7 +19532,7 @@
             1. Assert: _propKey_.[[Brand]] is _object_.
             1. Assert: _propKey_ does not have a [[Get]] field.
             1. Set _propKey_.[[Get]] to _closure_.
-          1. Otherwise,
+          1. Else,
             1. Set _propKey_.[[Kind]] to `"accessor"`.
             1. Set _propKey_.[[Brand]] to _object_.
             1. Set _propKey_.[[Get]] to _closure_.
@@ -19556,7 +19556,7 @@
             1. Assert: _propKey_.[[Brand]] is _object_.
             1. Assert: _propKey_ does not have a [[Set]] field.
             1. Set _propKey_.[[Set]] to _closure_.
-          1. Otherwise,
+          1. Else,
             1. Set _propKey_.[[Kind]] to `"accessor"`.
             1. Set _propKey_.[[Brand]] to _object_.
             1. Set _propKey_.[[Set]] to _closure_.
@@ -20868,7 +20868,7 @@
         1. If _scopeEnvRec_'s binding for _privateIdentifier_ is uninitialized, then
           1. Let _privateName_ be NewPrivateName(_privateIdentifier_).
           1. Perform ! _scopeEnvRec_.InitializeBinding(_privateIdentifier_, _privateName_).
-        1. Otherwise,
+        1. Else,
           1. Let _privateName_ be _scopeEnvRec_.GetBindingValue(_privateIdentifier_).
           1. NOTE: The only case where this may occur is in getter/setter pairs; other duplicates are prohibited as a Syntax Error.
         1. Assert: _privateName_.[[Description]] is _privateIdentifier_.
