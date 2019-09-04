@@ -5221,12 +5221,12 @@
       <emu-alg>
         1. Assert: _P_ is a Private Name.
         1. Assert: Type(_O_) is Object.
-        1. If _P_.[[Kind]] is `"field"`,
+        1. If _P_.[[Kind]] is `"field"`, then
           1. Let _entry_ be ! PrivateFieldFind(_P_, _O_).
           1. If _entry_ is ~empty~, throw a *TypeError* exception.
           1. Return _entry_.[[PrivateFieldValue]].
         1. Perform ? PrivateBrandCheck(_O_, _P_).
-        1. If _P_.[[Kind]] is `"method"`,
+        1. If _P_.[[Kind]] is `"method"`, then
           1. Return _P_.[[Value]].
         1. Else,
           1. Assert: _P_.[[Kind]] is `"accessor"`.
@@ -5241,7 +5241,7 @@
       <emu-alg>
         1. Assert: _P_ is a Private Name.
         1. Assert: Type(_O_) is Object.
-        1. If _P_.[[Kind]] is `"field"`,
+        1. If _P_.[[Kind]] is `"field"`, then
           1. Let _entry_ be ! PrivateFieldFind(_P_, _O_).
           1. If _entry_ is ~empty~, throw a *TypeError* exception.
           1. Set _entry_.[[PrivateFieldValue]] to _value_.
@@ -5270,7 +5270,7 @@
         1. If _fieldRecord_.[[IsAnonymousFunctionDefinition]] is *true*, then
           1. Let _hasNameProperty_ be ? HasOwnProperty(_initValue_, `"name"`).
           1. If _hasNameProperty_ is *false*, perform ! SetFunctionName(_initValue_, _fieldName_).
-        1. If _fieldName_ is a Private Name,
+        1. If _fieldName_ is a Private Name, then
           1. Perform ? PrivateFieldAdd(_fieldName_, _receiver_, _initValue_).
         1. Else,
           1. Assert: ! IsPropertyKey(_fieldName_) is *true*.
@@ -5283,7 +5283,7 @@
       <emu-alg>
         1. Assert: Type(_O_) is Object.
         1. Assert: _constructor_ is an ECMAScript function object.
-        1. If _constructor_.[[PrivateBrand]] is not *undefined*,
+        1. If _constructor_.[[PrivateBrand]] is not *undefined*, then
           1. Perform ? PrivateBrandAdd(_O_, _constructor_.[[PrivateBrand]]).
         1. Let _fields_ be the value of _constructor_.[[Fields]].
         1. For each item _fieldRecord_ in order from _fields_,
@@ -5294,7 +5294,7 @@
     <emu-clause id="sec-privatebrandcheck" aoid="PrivateBrandCheck">
       <h1>PrivateBrandCheck ( _O_, _P_ )</h1>
       <emu-alg>
-        1. If _O_.[[PrivateBrands]] does not contain an entry _e_ such that SameValue(_e_, _P_.[[Brand]]) is *true*,
+        1. If _O_.[[PrivateBrands]] does not contain an entry _e_ such that SameValue(_e_, _P_.[[Brand]]) is *true*, then
           1. Throw a *TypeError* exception.
       </emu-alg>
     </emu-clause>
@@ -5302,7 +5302,7 @@
     <emu-clause id="sec-privatebrandadd" aoid="PrivateBrandAdd">
       <h1>PrivateBrandAdd ( _O_, _brand_ )</h1>
       <emu-alg>
-        1. If _O_.[[PrivateBrands]] contains an entry _e_ such that SameValue(_e_, _brand_) is *true*,
+        1. If _O_.[[PrivateBrands]] contains an entry _e_ such that SameValue(_e_, _brand_) is *true*, then
           1. Throw a *TypeError* exception.
         1. Append _brand_ to _O_.[[PrivateBrands]].
       </emu-alg>
@@ -8051,7 +8051,7 @@
       <h1>DefineOrdinaryMethod ( _key_, _homeObject_, _closure_, _enumerable_ )</h1>
       <emu-alg>
         1. Perform SetFunctionName(_closure_, _key_).
-        1. If _key_ is a Private Name,
+        1. If _key_ is a Private Name, then
           1. Assert: _key_ does not have a [[Kind]] field.
           1. Set _key_.[[Kind]] to `"method"`.
           1. Set _key_.[[Value]] to _closure_.
@@ -8073,7 +8073,7 @@
           1. Let _description_ be _name_'s [[Description]] value.
           1. If _description_ is *undefined*, set _name_ to the empty String.
           1. Else, set _name_ to the string-concatenation of `"["`, _description_, and `"]"`.
-        1. Else if _name_ is a Private Name,
+        1. Else if _name_ is a Private Name, then
           1. Set _name_ to _name_.[[Description]].
         1. If _prefix_ is present, then
           1. Set _name_ to the string-concatenation of _prefix_, the code unit 0x0020 (SPACE), and _name_.
@@ -19526,8 +19526,8 @@
         1. Perform MakeMethod(_closure_, _object_).
         1. Perform SetFunctionName(_closure_, _propKey_, `"get"`).
         1. Set _closure_.[[SourceText]] to the source text matched by |MethodDefinition|.
-        1. If _propKey_ is a Private Name,
-          1. If _propKey_ has a [[Kind]] field,
+        1. If _propKey_ is a Private Name, then
+          1. If _propKey_ has a [[Kind]] field, then
             1. Assert: _propKey_.[[Kind]] is `"accessor"`.
             1. Assert: _propKey_.[[Brand]] is _object_.
             1. Assert: _propKey_ does not have a [[Get]] field.
@@ -19550,8 +19550,8 @@
         1. Perform MakeMethod(_closure_, _object_).
         1. Perform SetFunctionName(_closure_, _propKey_, `"set"`).
         1. Set _closure_.[[SourceText]] to the source text matched by |MethodDefinition|.
-        1. If _propKey_ is a Private Name,
-          1. If _propKey_ has a [[Kind]] field,
+        1. If _propKey_ is a Private Name, then
+          1. If _propKey_ has a [[Kind]] field, then
             1. Assert: _propKey_.[[Kind]] is `"accessor"`.
             1. Assert: _propKey_.[[Brand]] is _object_.
             1. Assert: _propKey_ does not have a [[Set]] field.
@@ -20673,7 +20673,7 @@
       <emu-alg>
         1. Let _name_ be the result of evaluating |ClassElementName|.
         1. ReturnIfAbrupt(_name_).
-        1. If |Initializer_opt| is present,
+        1. If |Initializer_opt| is present, then
           1. Let _lex_ be the Lexical Environment of the running execution context.
           1. Let _formalParameterList_ be an instance of the production <emu-grammar>FormalParameters : [empty]</emu-grammar>.
           1. Let _privateScope_ be the PrivateEnvironment of the running execution context.
@@ -20779,16 +20779,16 @@
             1. Set the running execution context's LexicalEnvironment to _lex_.
             1. Set the running execution context's PrivateEnvironment to _outerPrivateEnvironment_.
             1. Return Completion(_field_).
-          1. If _field_ is not ~empty~,
+          1. If _field_ is not ~empty~, then
             1. If IsStatic of _e_ is *false*, append _field_ to _instanceFields_.
             1. Else, append _field_ to _staticFields_.
         1. Set the running execution context's LexicalEnvironment to _lex_.
         1. If _classBinding_ is not *undefined*, then
           1. Perform _classScopeEnvRec_.InitializeBinding(_classBinding_, _F_).
         1. Set _F_.[[Fields]] to _instanceFields_.
-        1. If PrivateBoundIdentifiers of |ClassBody| contains a Private Name _P_ such that _P_'s [[Kind]] field is either `"method"` or `"accessor"` and _P_'s [[Brand]] field is _proto_,
+        1. If PrivateBoundIdentifiers of |ClassBody| contains a Private Name _P_ such that _P_'s [[Kind]] field is either `"method"` or `"accessor"` and _P_'s [[Brand]] field is _proto_, then
           1. Set _F_.[[PrivateBrand]] to _proto_.
-        1. If PrivateBoundIdentifiers of |ClassBody| contains a Private Name _P_ such that _P_'s [[Kind]] field is either `"method"` or `"accessor"` and _P_'s [[Brand]] is _F_,
+        1. If PrivateBoundIdentifiers of |ClassBody| contains a Private Name _P_ such that _P_'s [[Kind]] field is either `"method"` or `"accessor"` and _P_'s [[Brand]] is _F_, then
           1. PrivateBrandAdd(_F_, _F_).
         1. For each item _fieldRecord_ in order from _staticFields_,
           1. Perform ? DefineField(_F_, _field_).
@@ -20865,7 +20865,7 @@
         1. Let _scope_ be the running execution context's PrivateEnvironment.
         1. Let _scopeEnvRec_ be _scope_'s EnvironmentRecord.
         1. Assert: _scopeEnvRec_ has a binding for _privateIdentifier_.
-        1. If _scopeEnvRec_'s binding for _privateIdentifier_ is uninitialized,
+        1. If _scopeEnvRec_'s binding for _privateIdentifier_ is uninitialized, then
           1. Let _privateName_ be NewPrivateName(_privateIdentifier_).
           1. Perform ! _scopeEnvRec_.InitializeBinding(_privateIdentifier_, _privateName_).
         1. Otherwise,
