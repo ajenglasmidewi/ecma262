@@ -20662,6 +20662,36 @@
       <emu-note type=editor>TODO: Elaborate the preceding paragraph with spec text inserted in each relevant place</emu-note>
     </emu-clause>
 
+    <emu-clause id="sec-class-definitions-runtime-semantics-classfielddefinitionevaluation">
+      <h1>Runtime Semantics: ClassFieldDefinitionEvaluation</h1>
+
+      <p>With parameter _homeObject_.</p>
+
+      <emu-grammar>
+        FieldDefinition : ClassElementName Initializer?
+      </emu-grammar>
+      <emu-alg>
+        1. Let _name_ be the result of evaluating |ClassElementName|.
+        1. ReturnIfAbrupt(_name_).
+        1. If |Initializer_opt| is present,
+          1. Let _lex_ be the Lexical Environment of the running execution context.
+          1. Let _formalParameterList_ be an instance of the production <emu-grammar>FormalParameters : [empty]</emu-grammar>.
+          1. Let _privateScope_ be the PrivateEnvironment of the running execution context.
+          1. Let _initializer_ be FunctionCreate(~Method~, _formalParameterList_, |Initializer|, _lex_, _privateScope_).
+          1. Perform MakeMethod(_initializer_, _homeObject_).
+          1. Set _initializer_.[[ClassFieldInitializer]] to *true*.
+          1. Let _isAnonymousFunctionDefinition_ be IsAnonymousFunctionDefinition(|Initializer|).
+        1. Else,
+          1. Let _initializer_ be ~empty~.
+          1. Let _isAnonymousFunctionDeclaration_ be *false*.
+        1. Return the Record {
+             [[Name]]: _name_,
+             [[Initializer]]: _initializer_,
+             [[IsAnonymousFunctionDefinition]]: _isAnonymousFunctionDefinition_
+           }.
+      </emu-alg>
+    </emu-clause>
+
     <emu-clause id="sec-class-definitions-static-semantics-classelementevaluation">
       <h1>Runtime Semantics: ClassElementEvaluation</h1>
       <p>With parameters _object_ and _enumerable_.</p>
@@ -20845,36 +20875,6 @@
           1. NOTE: The only case where this may occur is in getter/setter pairs; other duplicates are prohibited as a Syntax Error.
         1. Assert: _privateName_.[[Description]] is _privateIdentifier_.
         1. Return _privateName_.
-      </emu-alg>
-    </emu-clause>
-
-    <emu-clause id="sec-class-definitions-runtime-semantics-classfielddefinitionevaluation">
-      <h1>Runtime Semantics: ClassFieldDefinitionEvaluation</h1>
-
-      <p>With parameter _homeObject_.</p>
-
-      <emu-grammar>
-        FieldDefinition : ClassElementName Initializer?
-      </emu-grammar>
-      <emu-alg>
-        1. Let _name_ be the result of evaluating |ClassElementName|.
-        1. ReturnIfAbrupt(_name_).
-        1. If |Initializer_opt| is present,
-          1. Let _lex_ be the Lexical Environment of the running execution context.
-          1. Let _formalParameterList_ be an instance of the production <emu-grammar>FormalParameters : [empty]</emu-grammar>.
-          1. Let _privateScope_ be the PrivateEnvironment of the running execution context.
-          1. Let _initializer_ be FunctionCreate(~Method~, _formalParameterList_, |Initializer|, _lex_, _privateScope_).
-          1. Perform MakeMethod(_initializer_, _homeObject_).
-          1. Set _initializer_.[[ClassFieldInitializer]] to *true*.
-          1. Let _isAnonymousFunctionDefinition_ be IsAnonymousFunctionDefinition(|Initializer|).
-        1. Else,
-          1. Let _initializer_ be ~empty~.
-          1. Let _isAnonymousFunctionDeclaration_ be *false*.
-        1. Return the Record {
-             [[Name]]: _name_,
-             [[Initializer]]: _initializer_,
-             [[IsAnonymousFunctionDefinition]]: _isAnonymousFunctionDefinition_
-           }.
       </emu-alg>
     </emu-clause>
   </emu-clause>
