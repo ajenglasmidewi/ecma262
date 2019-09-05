@@ -5198,7 +5198,7 @@
       <h1>PrivateFieldFind ( _P_, _O_ )</h1>
       <emu-alg>
         1. Assert: _P_ is a Private Name.
-        1. Assert: _O_ is an Object that has a [[PrivateFieldValues]] internal slot.
+        1. Assert: Type(_O_) is Object.
         1. For each element _entry_ of _O_.[[PrivateFieldValues]], do
           1. If _entry_.[[PrivateName]] is _P_, return _entry_.
         1. Return ~empty~.
