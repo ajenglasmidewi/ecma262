@@ -8064,10 +8064,10 @@
 
     <emu-clause id="sec-setfunctionname" aoid="SetFunctionName">
       <h1>SetFunctionName ( _F_, _name_ [ , _prefix_ ] )</h1>
-      <p>The abstract operation SetFunctionName requires a Function argument _F_, a String or Symbol argument _name_ and optionally a String argument _prefix_. This operation adds a `name` property to _F_ by performing the following steps:</p>
+      <p>The abstract operation SetFunctionName requires a Function argument _F_, a String or Symbol or Private Name argument _name_ and optionally a String argument _prefix_. This operation adds a `name` property to _F_ by performing the following steps:</p>
       <emu-alg>
         1. Assert: _F_ is an extensible object that does not have a `name` own property.
-        1. Assert: Type(_name_) is either Symbol or String.
+        1. Assert: Type(_name_) is either Symbol, String, or Private Name.
         1. Assert: If _prefix_ is present, then Type(_prefix_) is String.
         1. If Type(_name_) is Symbol, then
           1. Let _description_ be _name_'s [[Description]] value.
