@@ -20438,7 +20438,7 @@
       <emu-alg>
         1. Return *true*.
       </emu-alg>
-      <emu-grammar>ClassElement : FieldDefinition</emu-grammar>
+      <emu-grammar>ClassElement : FieldDefinition `;`</emu-grammar>
       <emu-alg>
         1. Return *false*.
       </emu-alg>
@@ -20579,7 +20579,7 @@
           `async` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
 
         AsyncGeneratorMethod :
-          `async` `*` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
+          `async` `*` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncGeneratorBody `}`
       </emu-grammar>
       <emu-alg>
         1. Return PrivateBoundIdentifiers of |ClassElementName|.
