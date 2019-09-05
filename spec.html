@@ -20231,7 +20231,7 @@
         `;`
 
       FieldDefinition[Yield, Await] :
-        ClassElementName[?Yield, ?Await] Initializer[In, ~Yield, ~Await]?
+        ClassElementName[?Yield, ?Await] Initializer[+In, ?Yield, ?Await]?
 
       ClassElementName[Yield, Await] :
         PropertyName[?Yield, ?Await]
