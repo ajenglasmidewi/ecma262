@@ -20804,7 +20804,7 @@
         1. If PrivateBoundIdentifiers of |ClassBody| contains a Private Name _P_ such that _P_.[[Kind]] is either `"method"` or `"accessor"` and _P_.[[Brand]] is _F_, then
           1. Perform ? PrivateBrandAdd(_F_, _F_).
         1. For each element _fieldRecord_ of _staticFields_ in List order, do
-          1. Perform ? DefineField(_F_, _field_).
+          1. Perform ? DefineField(_F_, _fieldRecord_).
         1. Set the running execution context's PrivateEnvironment to _outerPrivateEnvironment_.
         1. Return _F_.
       </emu-alg>
