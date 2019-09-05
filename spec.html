@@ -1352,7 +1352,7 @@
         <p>All objects have an internal slot named [[PrivateFieldValues]], which is a List of PrivateField Records. This List represents the values of the private fields for the object. Initially, it is an empty List.</p>
         <p>All objects have an internal slot named [[PrivateBrands]], which is a List of ECMAScript values which are used for checking to see if an object supports a private method or accessor. The entries in the list correspond to the "original prototype" (or, in the case of static methods, the "original constructor") which contained the private method or accessor. Initially, it is an empty List.</p>
         <emu-note>
-          <p>Although this specification uses logic of a [[PrivateBrand]] List which is held per-instance, the use of this list obeys certain invariants:</p>
+          <p>Although this specification uses logic of a [[PrivateBrands]] List which is held per-instance, the use of this list obeys certain invariants:</p>
 
           <ul>
             <li>Nothing is removed from the list; things are only added to the end.</li>
