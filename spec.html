@@ -42089,7 +42089,7 @@ THH:mm:ss.sss
       </emu-annex>
       <emu-annex id="sec-web-compat-evaldeclarationinstantiation">
         <h1>Changes to EvalDeclarationInstantiation</h1>
-        <p>During EvalDeclarationInstantiation the following steps are performed in place of step 9:</p>
+        <p>During EvalDeclarationInstantiation the following steps are performed in place of step 13:</p>
         <emu-alg>
           1. If _strict_ is *false*, then
             1. Let _declaredFunctionOrVarNames_ be a new empty List.
@@ -42156,12 +42156,12 @@ THH:mm:ss.sss
       </emu-annex>
       <emu-annex id="sec-web-compat-blockdeclarationinstantiation">
         <h1>Changes to BlockDeclarationInstantiation</h1>
-        <p>During BlockDeclarationInstantiation the following steps are performed in place of step 4.a.ii.1:</p>
+        <p>During BlockDeclarationInstantiation the following steps are performed in place of step 5.a.ii.1:</p>
         <emu-alg>
           1. If _envRec_.HasBinding(_dn_) is *false*, then
             1. Perform ! _envRec_.CreateMutableBinding(_dn_, *false*).
         </emu-alg>
-        <p>During BlockDeclarationInstantiation the following steps are performed in place of step 4.b.iii:</p>
+        <p>During BlockDeclarationInstantiation the following steps are performed in place of step 5.b.iii:</p>
         <emu-alg>
           1. If _envRec_.HasBinding(_fn_) is *false*, then
             1. Perform _envRec_.InitializeBinding(_fn_, _fo_).
