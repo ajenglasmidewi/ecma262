@@ -10408,7 +10408,7 @@
             `#` IdentifierName
         </emu-grammar>
         <emu-alg>
-          1. Return the String value consisting of the sequence of code units corresponding to |PrivateIdentifier|. In determining the sequence any occurrences of `\\` |UnicodeEscapeSequence| are first replaced with the code point represented by the |UnicodeEscapeSequence| and then the code points of the entire |PrivateIdentifier| are converted to code units by UTF16Encoding (<emu-xref href="#sec-utf16encoding"></emu-xref>) each code point.
+          1. Return the string-concatenation of 0x0023 (NUMBER SIGN) and the StringValue of |IdentifierName|.
         </emu-alg>
       </emu-clause>
     </emu-clause>
