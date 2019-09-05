@@ -19490,7 +19490,7 @@
       <p>With parameter _object_ and optional parameter _functionPrototype_.</p>
       <emu-grammar>MethodDefinition : ClassElementName `(` UniqueFormalParameters `)` `{` FunctionBody `}`</emu-grammar>
       <emu-alg>
-        1. Let _propKey_ be the result of evaluating |PropertyName|.
+        1. Let _propKey_ be the result of evaluating |ClassElementName|.
         1. ReturnIfAbrupt(_propKey_).
         1. Let _scope_ be the running execution context's LexicalEnvironment.
         1. Let _privateScope_ be the PrivateEnvironment of the running execution context.
@@ -19519,7 +19519,7 @@
       </emu-alg>
       <emu-grammar>MethodDefinition : `get` ClassElementName `(` `)` `{` FunctionBody `}`</emu-grammar>
       <emu-alg>
-        1. Let _propKey_ be the result of evaluating |PropertyName|.
+        1. Let _propKey_ be the result of evaluating |ClassElementName|.
         1. ReturnIfAbrupt(_propKey_).
         1. Let _scope_ be the running execution context's LexicalEnvironment.
         1. Let _privateScope_ be the PrivateEnvironment of the running execution context.
@@ -19544,7 +19544,7 @@
       </emu-alg>
       <emu-grammar>MethodDefinition : `set` ClassElementName `(` PropertySetParameterList `)` `{` FunctionBody `}`</emu-grammar>
       <emu-alg>
-        1. Let _propKey_ be the result of evaluating |PropertyName|.
+        1. Let _propKey_ be the result of evaluating |ClassElementName|.
         1. ReturnIfAbrupt(_propKey_).
         1. Let _scope_ be the running execution context's LexicalEnvironment.
         1. Let _privateScope_ be the PrivateEnvironment of the running execution context.
@@ -19802,7 +19802,7 @@
       <emu-see-also-para op="PropertyDefinitionEvaluation"></emu-see-also-para>
       <emu-grammar>GeneratorMethod : `*` ClassElementName `(` UniqueFormalParameters `)` `{` GeneratorBody `}`</emu-grammar>
       <emu-alg>
-        1. Let _propKey_ be the result of evaluating |PropertyName|.
+        1. Let _propKey_ be the result of evaluating |ClassElementName|.
         1. ReturnIfAbrupt(_propKey_).
         1. Let _scope_ be the running execution context's LexicalEnvironment.
         1. Let _privateScope_ be the PrivateEnvironment of the running execution context.
@@ -20645,7 +20645,7 @@
         AsyncMethod : `async` ClassElementName `(` UniqueFormalParameters `)` `{` AsyncFunctionBody `}`
       </emu-grammar>
       <emu-alg>
-        1. Return the result of ContainsArguments of |PropertyName|.
+        1. Return the result of ContainsArguments of |ClassElementName|.
       </emu-alg>
 
       <emu-grammar>
