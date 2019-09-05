@@ -5212,7 +5212,7 @@
         1. Assert: Type(_O_) is Object.
         1. Let _entry_ be ! PrivateFieldFind(_P_, _O_).
         1. If _entry_ is not ~empty~, throw a *TypeError* exception.
-        1. Append { [[PrivateName]]: P, [[PrivateFieldValue]]: _value_ } to _O_.[[PrivateFieldValues]].
+        1. Append PrivateField { [[PrivateName]]: P, [[PrivateFieldValue]]: _value_ } to _O_.[[PrivateFieldValues]].
       </emu-alg>
     </emu-clause>
 
@@ -20685,7 +20685,7 @@
         1. Else,
           1. Let _initializer_ be ~empty~.
           1. Let _isAnonymousFunctionDeclaration_ be *false*.
-        1. Return the Record { [[Name]]: _name_, [[Initializer]]: _initializer_, [[IsAnonymousFunctionDefinition]]: _isAnonymousFunctionDefinition_ }.
+        1. Return the ClassFieldDefinition Record { [[Name]]: _name_, [[Initializer]]: _initializer_, [[IsAnonymousFunctionDefinition]]: _isAnonymousFunctionDefinition_ }.
       </emu-alg>
     </emu-clause>
 
