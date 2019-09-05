@@ -24519,11 +24519,11 @@
                   1. NOTE: A direct eval will not hoist var declaration over a like-named lexical declaration.
               1. Set _thisLex_ to _thisLex_'s outer environment reference.
           1. Let _privateIdentifiers_ be a new empty List.
-          1. Let _privateEnv_ be _privateEnv_.
-          1. Repeat, while _privateEnv_ is not *null*,
-            1. For each binding named _N_ in _privateEnv_, do
+          1. Let _privEnv_ be _privateEnv_.
+          1. Repeat, while _privEnv_ is not *null*,
+            1. For each binding named _N_ in _privEnv_, do
               1. If _privateIdentifiers_ does not contain _N_, append _N_ to _privateIdentifiers_.
-            1. Set _privateEnv_ to _privateEnv_'s outer environment reference.
+            1. Set _privEnv_ to _privEnv_'s outer environment reference.
           1. If AllPrivateIdentifiersValid of _body_ with argument _privateIdentifiers_ is *false*, throw a *SyntaxError* exception.
           1. Let _functionsToInitialize_ be a new empty List.
           1. Let _declaredFunctionNames_ be a new empty List.
