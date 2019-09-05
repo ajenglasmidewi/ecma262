@@ -20792,7 +20792,7 @@
             1. Set the running execution context's LexicalEnvironment to _lex_.
             1. Set the running execution context's PrivateEnvironment to _outerPrivateEnvironment_.
             1. Return Completion(_field_).
-          1. If _field_ is not ~empty~, then
+          1. If _field_ is a ClassFieldDefinition Record, then
             1. If IsStatic of _e_ is *false*, append _field_ to _instanceFields_.
             1. Else, append _field_ to _staticFields_.
         1. Set the running execution context's LexicalEnvironment to _lex_.
