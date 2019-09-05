@@ -20884,6 +20884,7 @@
         1. Else,
           1. Let _privateName_ be ! _scopeEnvRec_.GetBindingValue(_privateIdentifier_).
           1. NOTE: The only case where this may occur is in getter/setter pairs; other duplicates are prohibited as a Syntax Error.
+          1. Assert: _privateName_ is a Private Name.
         1. Assert: _privateName_.[[Description]] is _privateIdentifier_.
         1. Return _privateName_.
       </emu-alg>
