@@ -9953,86 +9953,45 @@
       <p>A reserved word is an |IdentifierName| that cannot be used as an |Identifier|.</p>
       <h2>Syntax</h2>
       <emu-grammar type="definition">
-        ReservedWord ::
-          Keyword
-          FutureReservedWord
-          NullLiteral
-          BooleanLiteral
+        ReservedWord :: one of
+          `await`
+          `break`
+          `case` `catch` `class` `const` `continue`
+          `debugger` `default` `delete` `do`
+          `else` `enum` `export` `extends`
+          `false` `finally` `for` `function`
+          `if` `import` `in` `instanceof`
+          `new` `null`
+          `return`
+          `super` `switch`
+          `this` `throw` `true` `try` `typeof`
+          `var` `void`
+          `while` `with`
+          `yield`
       </emu-grammar>
+      <emu-note>
+        <p>`enum` is so far unused. It is reserved for use as a keyword in future language extensions.</p>
+      </emu-note>
       <emu-note>
         <p>The |ReservedWord| definitions are specified as literal sequences of specific |SourceCharacter| elements. A code point in a |ReservedWord| cannot be expressed by a `\\` |UnicodeEscapeSequence|.</p>
       </emu-note>
-
-      <emu-clause id="sec-keywords">
-        <h1>Keywords</h1>
-        <p>The following tokens are ECMAScript keywords and may not be used as |Identifier|s in ECMAScript programs.</p>
-        <h2>Syntax</h2>
-        <emu-grammar type="definition">
-          Keyword :: one of
-            `await`
-            `break`
-            `case` `catch` `class` `const` `continue`
-            `debugger` `default` `delete` `do`
-            `else` `export` `extends`
-            `finally` `for` `function`
-            `if` `import` `in` `instanceof`
-            `new`
-            `return`
-            `super` `switch`
-            `this` `throw` `try` `typeof`
-            `var` `void`
-            `while` `with`
-            `yield`
-        </emu-grammar>
-        <emu-note>
-          <p>In some contexts `yield` and `await` are given the semantics of an |Identifier|. See <emu-xref href="#sec-identifiers-static-semantics-early-errors"></emu-xref>. In strict mode code, `let` and `static` are treated as reserved words through static semantic restrictions (see <emu-xref href="#sec-identifiers-static-semantics-early-errors"></emu-xref>, <emu-xref href="#sec-let-and-const-declarations-static-semantics-early-errors"></emu-xref>, <emu-xref href="#sec-for-in-and-for-of-statements-static-semantics-early-errors"></emu-xref>, and <emu-xref href="#sec-class-definitions-static-semantics-early-errors"></emu-xref>) rather than the lexical grammar.</p>
-        </emu-note>
-      </emu-clause>
-
-      <emu-clause id="sec-future-reserved-words">
-        <h1>Future Reserved Words</h1>
-        <p>The following tokens are reserved for use as keywords in future language extensions.</p>
-        <h2>Syntax</h2>
-        <emu-grammar type="definition">
-          FutureReservedWord ::
-            `enum`
-        </emu-grammar>
-        <emu-note>
-          <p>Use of the following tokens within strict mode code is also reserved. That usage is restricted using static semantic restrictions (see <emu-xref href="#sec-identifiers-static-semantics-early-errors"></emu-xref>) rather than the lexical grammar:</p>
-          <figure>
-            <table class="lightweight-table">
-              <tbody>
-              <tr>
-                <td>
-                  `implements`
-                </td>
-                <td>
-                  `package`
-                </td>
-                <td>
-                  `protected`
-                </td>
-                <td>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  `interface`
-                </td>
-                <td>
-                  `private`
-                </td>
-                <td>
-                  `public`
-                </td>
-                <td>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </figure>
-        </emu-note>
-      </emu-clause>
+      <emu-note>
+        <p>In addition to the |ReservedWord| list, several early error rules constrain the set of |IdentifierName|s that can serve as |Identifier|s in a given context. See <emu-xref href="#sec-identifiers-static-semantics-early-errors"></emu-xref>, <emu-xref href="#sec-let-and-const-declarations-static-semantics-early-errors"></emu-xref>, <emu-xref href="#sec-for-in-and-for-of-statements-static-semantics-early-errors"></emu-xref>, and <emu-xref href="#sec-class-definitions-static-semantics-early-errors"></emu-xref>. These rules specify ECMAScript's <em>conditional keywords</em>, |IdentifierName|s that are sometimes reserved, depending on context. In summary:</p>
+        <ul>
+          <li>
+            <p>Although `yield` and `await` are |ReservedWord|s, they can serve as |Identifier|s in some contexts.</p>
+          </li>
+          <li>
+            <p>Several names that are not in the |ReservedWord| list are nonetheless reserved in strict mode code: `let`, `static`, `implements`, `interface`, `package`, `private`, `protected`, and `public`.</p>
+          </li>
+          <li>
+            <p>The names `arguments` and `eval` are subject to some restrictions in strict mode code.</p>
+          </li>
+          <li>
+            <p>A few names appear in syntactic productions, but are not reserved at all, and thus can always be used as |Identifier|s: `as`, `async`, `from`, `get`, `of`, `set`, and `target`.</p>
+          </li>
+        </ul>
+      </emu-note>
     </emu-clause>
   </emu-clause>
 
@@ -39777,13 +39736,6 @@ THH:mm:ss.sss
     <emu-prodref name=UnicodeIDStart></emu-prodref>
     <emu-prodref name=UnicodeIDContinue></emu-prodref>
     <emu-prodref name=ReservedWord></emu-prodref>
-    <emu-prodref name=Keyword></emu-prodref>
-    <emu-prodref name=FutureReservedWord></emu-prodref>
-    <p>The following tokens are also considered to be |FutureReservedWord|s when parsing strict mode code:</p>
-    <p><emu-t>implements</emu-t> &nbsp;<emu-t>package</emu-t> &nbsp;<emu-t>protected</emu-t><br>
-      <emu-t>interface</emu-t> &nbsp;<emu-t>private</emu-t> &nbsp;<emu-t>public</emu-t>
-    </p>
-    <p>&nbsp;</p>
     <emu-prodref name=Punctuator></emu-prodref>
     <emu-prodref name=DivPunctuator></emu-prodref>
     <emu-prodref name=RightBracePunctuator></emu-prodref>
