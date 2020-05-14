@@ -8858,7 +8858,7 @@
 
       <emu-clause id="sec-bound-function-exotic-objects-call-thisargument-argumentslist">
         <h1>[[Call]] ( _thisArgument_, _argumentsList_ )</h1>
-        <p>When the [[Call]] internal method of a bound function exotic object, _F_, which was created using the bind function is called with parameters _thisArgument_ and _argumentsList_, a List of ECMAScript language values, the following steps are taken:</p>
+        <p>When the [[Call]] internal method of a bound function exotic object, _F_ is called with parameters _thisArgument_ and _argumentsList_, a List of ECMAScript language values, the following steps are taken:</p>
         <emu-alg>
           1. Let _target_ be _F_.[[BoundTargetFunction]].
           1. Let _boundThis_ be _F_.[[BoundThis]].
@@ -8870,7 +8870,7 @@
 
       <emu-clause id="sec-bound-function-exotic-objects-construct-argumentslist-newtarget">
         <h1>[[Construct]] ( _argumentsList_, _newTarget_ )</h1>
-        <p>When the [[Construct]] internal method of a bound function exotic object, _F_ that was created using the bind function is called with a list of arguments _argumentsList_ and _newTarget_, the following steps are taken:</p>
+        <p>When the [[Construct]] internal method of a bound function exotic object, _F_ is called with a list of arguments _argumentsList_ and _newTarget_, the following steps are taken:</p>
         <emu-alg>
           1. Let _target_ be _F_.[[BoundTargetFunction]].
           1. Assert: IsConstructor(_target_) is *true*.
