@@ -7882,7 +7882,7 @@
 
     <emu-clause id="sec-ordinary-object-internal-methods-and-internal-slots-setprototypeof-v">
       <h1>[[SetPrototypeOf]] ( _V_ )</h1>
-      <p>The [[SetPrototypeOf]] internal method of an ordinary object _O_ takes argument _V_. It performs the following steps when called:</p>
+      <p>The [[SetPrototypeOf]] internal method of an ordinary object _O_ takes argument _V_ (an Object or *null*). It performs the following steps when called:</p>
       <emu-alg>
         1. Return ! OrdinarySetPrototypeOf(_O_, _V_).
       </emu-alg>
@@ -9557,7 +9557,7 @@
 
       <emu-clause id="sec-module-namespace-exotic-objects-setprototypeof-v">
         <h1>[[SetPrototypeOf]] ( _V_ )</h1>
-        <p>The [[SetPrototypeOf]] internal method of a module namespace exotic object _O_ takes argument _V_. It performs the following steps when called:</p>
+        <p>The [[SetPrototypeOf]] internal method of a module namespace exotic object _O_ takes argument _V_ (an Object or *null*). It performs the following steps when called:</p>
         <emu-alg>
           1. Return ? SetImmutablePrototype(_O_, _V_).
         </emu-alg>
@@ -9708,7 +9708,7 @@
 
       <emu-clause id="sec-immutable-prototype-exotic-objects-setprototypeof-v">
         <h1>[[SetPrototypeOf]] ( _V_ )</h1>
-        <p>The [[SetPrototypeOf]] internal method of an immutable prototype exotic object _O_ takes argument _V_. It performs the following steps when called:</p>
+        <p>The [[SetPrototypeOf]] internal method of an immutable prototype exotic object _O_ takes argument _V_ (an Object or *null*). It performs the following steps when called:</p>
         <emu-alg>
           1. Return ? SetImmutablePrototype(_O_, _V_).
         </emu-alg>
@@ -9890,7 +9890,7 @@
 
     <emu-clause id="sec-proxy-object-internal-methods-and-internal-slots-setprototypeof-v">
       <h1>[[SetPrototypeOf]] ( _V_ )</h1>
-      <p>The [[SetPrototypeOf]] internal method of a Proxy exotic object _O_ takes argument _V_. It performs the following steps when called:</p>
+      <p>The [[SetPrototypeOf]] internal method of a Proxy exotic object _O_ takes argument _V_ (an Object or *null*). It performs the following steps when called:</p>
       <emu-alg>
         1. Assert: Either Type(_V_) is Object or Type(_V_) is Null.
         1. Let _handler_ be _O_.[[ProxyHandler]].
