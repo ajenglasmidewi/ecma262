@@ -8393,7 +8393,7 @@
 
     <emu-clause id="sec-ecmascript-function-objects-call-thisargument-argumentslist">
       <h1>[[Call]] ( _thisArgument_, _argumentsList_ )</h1>
-      <p>The [[Call]] internal method of an ECMAScript function object _F_ takes arguments _thisArgument_ and _argumentsList_ (a List of ECMAScript language values). It performs the following steps when called:</p>
+      <p>The [[Call]] internal method of an ECMAScript function object _F_ takes arguments _thisArgument_ (an ECMAScript language value) and _argumentsList_ (a List of ECMAScript language values). It performs the following steps when called:</p>
       <emu-alg>
         1. Assert: _F_ is an ECMAScript function object.
         1. If _F_.[[IsClassConstructor]] is *true*, throw a *TypeError* exception.
@@ -8747,7 +8747,7 @@
 
     <emu-clause id="sec-built-in-function-objects-call-thisargument-argumentslist">
       <h1>[[Call]] ( _thisArgument_, _argumentsList_ )</h1>
-      <p>The [[Call]] internal method of a built-in function object _F_ takes arguments _thisArgument_ and _argumentsList_ (a List of ECMAScript language values). It performs the following steps when called:</p>
+      <p>The [[Call]] internal method of a built-in function object _F_ takes arguments _thisArgument_ (an ECMAScript language value) and _argumentsList_ (a List of ECMAScript language values). It performs the following steps when called:</p>
       <emu-alg>
         1. Let _callerContext_ be the running execution context.
         1. If _callerContext_ is not already suspended, suspend _callerContext_.
@@ -8858,7 +8858,7 @@
 
       <emu-clause id="sec-bound-function-exotic-objects-call-thisargument-argumentslist">
         <h1>[[Call]] ( _thisArgument_, _argumentsList_ )</h1>
-        <p>The [[Call]] internal method of a bound function exotic object _F_ takes arguments _thisArgument_ and _argumentsList_ (a List of ECMAScript language values). It performs the following steps when called:</p>
+        <p>The [[Call]] internal method of a bound function exotic object _F_ takes arguments _thisArgument_ (an ECMAScript language value) and _argumentsList_ (a List of ECMAScript language values). It performs the following steps when called:</p>
         <emu-alg>
           1. Let _target_ be _F_.[[BoundTargetFunction]].
           1. Let _boundThis_ be _F_.[[BoundThis]].
@@ -10299,7 +10299,7 @@
 
     <emu-clause id="sec-proxy-object-internal-methods-and-internal-slots-call-thisargument-argumentslist">
       <h1>[[Call]] ( _thisArgument_, _argumentsList_ )</h1>
-      <p>The [[Call]] internal method of a Proxy exotic object _O_ takes arguments _thisArgument_ and _argumentsList_ (a List of ECMAScript language values). It performs the following steps when called:</p>
+      <p>The [[Call]] internal method of a Proxy exotic object _O_ takes arguments _thisArgument_ (an ECMAScript language value) and _argumentsList_ (a List of ECMAScript language values). It performs the following steps when called:</p>
       <emu-alg>
         1. Let _handler_ be _O_.[[ProxyHandler]].
         1. If _handler_ is *null*, throw a *TypeError* exception.
