@@ -6445,23 +6445,26 @@
 
         <emu-clause id="sec-declarative-environment-records-hasthisbinding">
           <h1>HasThisBinding ( )</h1>
-          <p>Regular declarative Environment Records do not provide a `this` binding.</p>
           <emu-alg>
             1. Return *false*.
           </emu-alg>
+          <emu-note>
+            <p>A regular declarative Environment Record (i.e., one that is neither a function Environment Record nor a module Environment Record) does not provide a `this` binding.</p>
+          </emu-note>
         </emu-clause>
 
         <emu-clause id="sec-declarative-environment-records-hassuperbinding">
           <h1>HasSuperBinding ( )</h1>
-          <p>Regular declarative Environment Records do not provide a `super` binding.</p>
           <emu-alg>
             1. Return *false*.
           </emu-alg>
+          <emu-note>
+            <p>A regular declarative Environment Record (i.e., one that is neither a function Environment Record nor a module Environment Record) does not provide a `super` binding.</p>
+          </emu-note>
         </emu-clause>
 
         <emu-clause id="sec-declarative-environment-records-withbaseobject">
           <h1>WithBaseObject ( )</h1>
-          <p>Declarative Environment Records always return *undefined* as their WithBaseObject.</p>
           <emu-alg>
             1. Return *undefined*.
           </emu-alg>
@@ -6558,28 +6561,34 @@
 
         <emu-clause id="sec-object-environment-records-hasthisbinding">
           <h1>HasThisBinding ( )</h1>
-          <p>Regular object Environment Records do not provide a `this` binding.</p>
           <emu-alg>
             1. Return *false*.
           </emu-alg>
+          <emu-note>
+            <p>Object Environment Records do not provide a `this` binding.</p>
+          </emu-note>
         </emu-clause>
 
         <emu-clause id="sec-object-environment-records-hassuperbinding">
           <h1>HasSuperBinding ( )</h1>
-          <p>Regular object Environment Records do not provide a `super` binding.</p>
           <emu-alg>
             1. Return *false*.
           </emu-alg>
+          <emu-note>
+            <p>Object Environment Records do not provide a `super` binding.</p>
+          </emu-note>
         </emu-clause>
 
         <emu-clause id="sec-object-environment-records-withbaseobject">
           <h1>WithBaseObject ( )</h1>
-          <p>Object Environment Records return *undefined* as their WithBaseObject unless their _withEnvironment_ flag is *true*.</p>
           <emu-alg>
             1. Let _envRec_ be the object Environment Record for which the method was invoked.
             1. If the _withEnvironment_ flag of _envRec_ is *true*, return the binding object for _envRec_.
             1. Otherwise, return *undefined*.
           </emu-alg>
+          <emu-note>
+            <p>Object Environment Records return *undefined* as their WithBaseObject unless their _withEnvironment_ flag is *true*.</p>
+          </emu-note>
         </emu-clause>
       </emu-clause>
 
@@ -6998,6 +7007,9 @@
           <emu-alg>
             1. Return *true*.
           </emu-alg>
+          <emu-note>
+            <p>Global Environment Records always provide a `this` binding.</p>
+          </emu-note>
         </emu-clause>
 
         <emu-clause id="sec-global-environment-records-hassuperbinding">
@@ -7005,11 +7017,13 @@
           <emu-alg>
             1. Return *false*.
           </emu-alg>
+          <emu-note>
+            <p>Global Environment Records do not provide a `super` binding.</p>
+          </emu-note>
         </emu-clause>
 
         <emu-clause id="sec-global-environment-records-withbaseobject">
           <h1>WithBaseObject ( )</h1>
-          <p>Global Environment Records always return *undefined* as their WithBaseObject.</p>
           <emu-alg>
             1. Return *undefined*.
           </emu-alg>
@@ -7203,10 +7217,12 @@
 
         <emu-clause id="sec-module-environment-records-hasthisbinding">
           <h1>HasThisBinding ( )</h1>
-          <p>Module Environment Records provide a `this` binding.</p>
           <emu-alg>
             1. Return *true*.
           </emu-alg>
+          <emu-note>
+            <p>Module Environment Records always provide a `this` binding.</p>
+          </emu-note>
         </emu-clause>
 
         <emu-clause id="sec-module-environment-records-getthisbinding">
