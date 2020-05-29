@@ -11327,9 +11327,6 @@
           <li>
             The MV of <emu-grammar>HexDigits :: HexDigits HexDigit</emu-grammar> is (the MV of |HexDigits| &times; 16<sub>ℝ</sub>) plus the MV of |HexDigit|.
           </li>
-          <li>
-            The MV of <emu-grammar>Hex4Digits :: HexDigit HexDigit HexDigit HexDigit</emu-grammar> is (0x1000<sub>ℝ</sub> times the MV of the first |HexDigit|) plus (0x100<sub>ℝ</sub> times the MV of the second |HexDigit|) plus (0x10<sub>ℝ</sub> times the MV of the third |HexDigit|) plus the MV of the fourth |HexDigit|.
-          </li>
         </ul>
       </emu-clause>
 
@@ -11659,13 +11656,25 @@
             The SV of <emu-grammar>NonEscapeCharacter :: SourceCharacter but not one of EscapeCharacter or LineTerminator</emu-grammar> is the UTF16Encoding of the code point value of |SourceCharacter|.
           </li>
           <li>
-            The SV of <emu-grammar>HexEscapeSequence :: `x` HexDigit HexDigit</emu-grammar> is the code unit whose value is (16<sub>ℝ</sub> times the MV of the first |HexDigit|) plus the MV of the second |HexDigit|.
+            The SV of <emu-grammar>HexEscapeSequence :: `x` HexDigit HexDigit</emu-grammar> is the code unit whose value is the MV of |HexEscapeSequence|.
           </li>
           <li>
             The SV of <emu-grammar>Hex4Digits :: HexDigit HexDigit HexDigit HexDigit</emu-grammar> is the code unit whose value is the MV of |Hex4Digits|.
           </li>
           <li>
             The SV of <emu-grammar>UnicodeEscapeSequence :: `u{` CodePoint `}`</emu-grammar> is the UTF16Encoding of the MV of |CodePoint|.
+          </li>
+        </ul>
+      </emu-clause>
+
+      <emu-clause id="sec-string-literals-static-semantics-mv">
+        <h1>Static Semantics: MV</h1>
+        <ul>
+          <li>
+            The MV of <emu-grammar>HexEscapeSequence :: `x` HexDigit HexDigit</emu-grammar> is (16<sub>ℝ</sub> times the MV of the first |HexDigit|) plus the MV of the second |HexDigit|.
+          </li>
+          <li>
+            The MV of <emu-grammar>Hex4Digits :: HexDigit HexDigit HexDigit HexDigit</emu-grammar> is (0x1000<sub>ℝ</sub> times the MV of the first |HexDigit|) plus (0x100<sub>ℝ</sub> times the MV of the second |HexDigit|) plus (0x10<sub>ℝ</sub> times the MV of the third |HexDigit|) plus the MV of the fourth |HexDigit|.
           </li>
         </ul>
       </emu-clause>
@@ -31266,7 +31275,7 @@ THH:mm:ss.sss
         </emu-note>
         <emu-grammar>CharacterEscape :: HexEscapeSequence</emu-grammar>
         <emu-alg>
-          1. Return the numeric value of the code unit that is the SV of |HexEscapeSequence|.
+          1. Return the MV of |HexEscapeSequence|.
         </emu-alg>
         <emu-grammar>RegExpUnicodeEscapeSequence :: `u` HexLeadSurrogate `\u` HexTrailSurrogate</emu-grammar>
         <emu-alg>
